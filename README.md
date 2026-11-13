@@ -50,7 +50,7 @@ Token budgets and sampling settings stay unchanged. A server-side `--reasoning-b
 ## Boundaries
 
 - Updates the **active session model**, not the provider catalog. Authentication, `/llama`, downloads, classifiers, and other providers stay untouched.
-- Discovers efforts at session start and model changes. Reapplies before a prompt if Pi replaces the active model with a fresh catalog entry. Use `/reload` to rediscover changed template capabilities.
+- Discovers efforts at session start and model changes. Reapplies before a prompt if Pi replaces the active model with a fresh catalog entry. Restart Pi to rediscover changed template capabilities; `/reload` retains the enhanced model.
 - Checks `/models` first; queries `/props?model=…` only for a model reported as loaded. Does not deliberately load or wake models. A shared router can still change state between those requests.
 - Leaves `reasoning: false`, custom thinking maps/formats, and explicit template kwargs unchanged. Pi must already recognize the model as reasoning-capable; effort-only templates that Pi misses need reasoning enabled in Pi’s model configuration first.
 - Adds no new off switch. Native effort support alone does not establish that thinking can be disabled.

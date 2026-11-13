@@ -20,6 +20,7 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
   const dir = await mkdtemp(join(tmpdir(), "pi-llama-reasoning-"));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const requests = [];
+  let serverProps = props;
   const catalog = { data: [{
     id: "qwen", status: { value: "loaded" }, meta: { n_ctx: 32768 },
     architecture: { input_modalities: ["text"], output_modalities: ["text"] },
@@ -33,7 +34,7 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
       res.end(JSON.stringify(catalog));
     } else if (req.url.startsWith("/props")) {
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify({ ...props, chat_template: "{% if enable_thinking %}think{% endif %}" }));
+      res.end(JSON.stringify({ ...serverProps, chat_template: "{% if enable_thinking %}think{% endif %}" }));
     } else if (req.url === "/v1/chat/completions") {
       res.setHeader("Content-Type", "text/event-stream");
       res.end(`data: ${JSON.stringify({
@@ -65,7 +66,7 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
   assert.ok(original);
   const providerBefore = runtime.getProvider("llama.cpp");
   const classifierBefore = runtime.getModelOfType("classifier", "llama.cpp", "qwen");
-  const loaded = await loadExtensions([join(process.cwd(), "extensions/index.ts")], dir, createEventBus());
+  let loaded = await loadExtensions([join(process.cwd(), "extensions/index.ts")], dir, createEventBus());
   assert.deepEqual(loaded.errors, []);
   const resourceLoader = {
     getExtensions: () => loaded,
@@ -75,7 +76,14 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
     getAgentsFiles: () => ({ agentsFiles: [] }),
     getSystemPrompt: () => "Say hello.", getSystemPromptSource: () => undefined,
     getAppendSystemPrompt: () => [], getAppendSystemPromptSources: () => [],
-    extendResources() {}, async reload() {},
+    extendResources() {},
+    async reload() {
+      loaded = await loadExtensions([
+        new URL("./extensions/llama/index.js", piEntry).pathname,
+        join(process.cwd(), "extensions/index.ts"),
+      ], dir, createEventBus());
+      assert.deepEqual(loaded.errors, []);
+    },
   };
   const { session } = await createAgentSession({
     cwd: dir, agentDir: dir, model: original, thinkingLevel: "medium", modelRuntime: runtime,
@@ -104,6 +112,15 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
   await session.setModel(original);
   await session.prompt("Hello after a catalog replacement.");
   assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
+
+  await t.test("reload retains enhanced metadata instead of rediscovering changed capabilities", async () => {
+    serverProps = { chat_template_caps: { supports_reasoning_effort: true, reasoning_effort_levels: ["low"] } };
+    const before = requests.length;
+    await session.reload();
+    assert.equal(requests.length, before, "reload does not query the router");
+    assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
+    serverProps = props;
+  });
 
   await session.setModel({
     ...session.model,

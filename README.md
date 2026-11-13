@@ -3,44 +3,19 @@
 <p>
   <a href="https://www.npmjs.com/package/pi-llama-reasoning"><img src="https://img.shields.io/npm/v/pi-llama-reasoning" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/pi-llama-reasoning"><img src="https://img.shields.io/npm/dt/pi-llama-reasoning" alt="npm downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/npm/l/pi-llama-reasoning" alt="license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a>
   <a href="https://pi.dev/packages/pi-llama-reasoning"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
 </p>
 
-Adds reasoning levels from llama.cpp’s router to Pi’s thinking selector.
+Use your llama.cpp model’s **native reasoning levels** in Pi’s existing thinking selector—not just thinking on/off.
 
-Keep using Pi’s existing connection, model picker, and `/llama` commands. No extra configuration.
-
-## What it solves
-
-llama.cpp reports the model’s reasoning levels, but Pi 1.5.2 doesn’t use that list. This extension adds them to Pi’s thinking selector and sends your choice to the model.
+Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration.
 
 ![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Token budgets stay unchanged.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
-Without the extension, Pi’s `medium` enables thinking but leaves the server’s effort setting unchanged. With it, `medium` selects the model’s medium effort. Token budgets stay separate.
-
-## How it works
-
-```mermaid
-%%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
-sequenceDiagram
-    participant Pi
-    participant Ext as This extension
-    participant Router as llama.cpp
-    Pi->>Ext: Model selected
-    Ext->>Router: Discover supported levels
-    Router-->>Ext: low, medium, xhigh (example)
-    Ext->>Pi: Add levels to thinking selector
-    Pi->>Router: Send prompt with chosen effort
-```
-
-See [vision.md](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md) for the detailed flow, design decisions, and implementation details.
-
 ## Install
 
-Requires Node.js >=22.19.0 and Pi 1.5.2.
-
-From npm, after publication:
+Requires Pi **1.5.2** and Node.js **22.19.0+**.
 
 ```bash
 pi install npm:pi-llama-reasoning
@@ -59,9 +34,24 @@ Restart Pi after installing.
 - Only discovers levels for loaded models that Pi already recognizes as reasoning-capable.
 - Keeps custom reasoning settings, token budgets, and sampling settings unchanged.
 - Server token limits still apply, even at `xhigh`.
-- Restart Pi after changing a model’s available reasoning levels; `/reload` won’t refresh them.
+- **Restart Pi** after changing a model’s available reasoning levels; `/reload` won’t refresh them.
 - If discovery is unavailable, keeps Pi’s existing behavior.
 
-## License
+## How it works
 
-[MIT](LICENSE).
+With the extension, `medium` selects the model’s medium effort—not just thinking on. Token budgets stay separate.
+
+```mermaid
+%%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
+sequenceDiagram
+    participant Pi
+    participant Ext as This extension
+    participant Router as llama.cpp
+    Pi->>Ext: Model selected
+    Ext->>Router: Discover supported levels
+    Router-->>Ext: low, medium, xhigh (example)
+    Ext->>Pi: Add levels to thinking selector
+    Pi->>Router: Send prompt with chosen effort
+```
+
+See [vision.md](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md) for the detailed flow, design decisions, and implementation details.

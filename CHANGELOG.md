@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Show loaded models’ native llama.cpp efforts in Pi’s thinking selector.
 - Send the selected effort without changing token budgets or replacing the built-in provider.
+- Visual README guide comparing Pi’s default controls with native effort selection.
 
 ### Fixed
 

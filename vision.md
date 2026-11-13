@@ -17,6 +17,46 @@ Only add functionality missing from built-in Pi. Other integration gaps need evi
 
 No changes to authentication, model loading, downloads, classifiers, or other providers.
 
+## Information flow
+
+Pi owns the provider, authentication, model management, thinking selector, and request serializer. The extension discovers native efforts and replaces only the active session model with an enhanced copy.
+
+```mermaid
+%%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"noteMargin": 40, "width": 240, "mirrorActors": false}}}%%
+sequenceDiagram
+    participant Pi as Pi 1.5.2
+    participant Ext as pi-llama-reasoning
+    participant Router as llama.cpp router
+
+    Note over Pi: Built-in login and catalog<br/>Model loading and selection<br/>Qwen path: off / medium
+    Pi->>Ext: Session start, model selection, or before prompt
+    Note over Ext: Check automatic candidate<br/>Keep explicit settings intact<br/>Skip enhanced model objects
+    Ext->>Pi: Resolve model endpoint, credentials, and headers
+    Pi-->>Ext: Existing connection details
+    Ext->>Router: GET /models
+    Router-->>Ext: Selected model status
+    alt Selected model is loaded
+        Ext->>Router: GET /props?model=selected-id
+        Router-->>Ext: chat_template_caps
+        Note over Ext: Require supports_reasoning_effort<br/>Read reasoning_effort_levels<br/>Example: low, medium, xhigh
+        opt Reported efforts are supported Pi labels
+            Ext->>Pi: pi.setModel(enhanced active-model copy)
+            Note over Pi: Inject thinkingLevelMap<br/>thinkingFormat: chat-template<br/>Map native reasoning_effort<br/>from thinking.effort<br/>Keep existing off toggle
+        end
+    else Not loaded
+        Note over Ext: Stop discovery<br/>Leave active model unchanged
+    end
+    opt Enhancement applied: user selects medium
+        Pi->>Pi: Thinking selector reads new map
+        Pi->>Router: Built-in serializer: POST /v1/chat/completions<br/>chat_template_kwargs.reasoning_effort = medium
+        Router-->>Pi: Stream model response
+    end
+```
+
+The injected `compat.chatTemplateKwargs` are metadata for Pi’s existing serializer, not a second HTTP client for generation. The extension also retains the Qwen toggle/preservation behavior where applicable. It does not change token budgets, sampling, the provider catalog, or persistent settings.
+
+Missing or unsupported capabilities and discovery failures leave the model unchanged. The loaded-status guard is best-effort: a shared router can change state between `/models` and `/props`. Generation in the diagram shows the intended request path; live generation remains unverified.
+
 ## Design decisions
 
 ### Keep the built-in provider

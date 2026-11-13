@@ -19,6 +19,8 @@ llama.cpp reports the model’s reasoning levels, but Pi 1.5.2 doesn’t use tha
 
 Without the extension, Pi’s `medium` enables thinking but leaves the server’s effort setting unchanged. With it, `medium` selects the model’s medium effort. Token budgets stay separate.
 
+[How it works: information flow](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md#information-flow).
+
 ## Install
 
 Requires Node.js >=22.19.0 and Pi 1.5.2.
@@ -44,3 +46,7 @@ Restart Pi after installing.
 - Server token limits still apply, even at `xhigh`.
 - Restart Pi after changing a model’s available reasoning levels; `/reload` won’t refresh them.
 - If discovery is unavailable, keeps Pi’s existing behavior.
+
+## License
+
+[MIT](LICENSE).

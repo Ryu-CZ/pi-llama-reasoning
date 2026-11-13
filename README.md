@@ -19,7 +19,22 @@ llama.cpp reports the model’s reasoning levels, but Pi 1.5.2 doesn’t use tha
 
 Without the extension, Pi’s `medium` enables thinking but leaves the server’s effort setting unchanged. With it, `medium` selects the model’s medium effort. Token budgets stay separate.
 
-See [vision.md](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md) for the information-flow diagram, design decisions, and implementation details.
+## How it works
+
+```mermaid
+%%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
+sequenceDiagram
+    participant Pi
+    participant Ext as This extension
+    participant Router as llama.cpp
+    Pi->>Ext: Model selected
+    Ext->>Router: Discover supported levels
+    Router-->>Ext: low, medium, xhigh (example)
+    Ext->>Pi: Add levels to thinking selector
+    Pi->>Router: Send prompt with chosen effort
+```
+
+See [vision.md](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md) for the detailed flow, design decisions, and implementation details.
 
 ## Install
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Make README setup instructions easier to find and correct the MIT license badge.
+
 ## [0.1.0] - 2026-11-13
 
 ### Added

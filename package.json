@@ -1,6 +1,6 @@
 {
   "name": "pi-llama-reasoning",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Adds reasoning levels from llama.cpp’s router to Pi’s thinking selector.",
   "type": "module",
   "keywords": ["pi-package", "pi-extension", "llama.cpp", "reasoning"],

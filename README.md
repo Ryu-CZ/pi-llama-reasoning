@@ -4,22 +4,24 @@ Adds reasoning levels from llama.cpp’s router to Pi’s thinking selector.
 
 Uses Pi’s built-in `llama.cpp` provider. No duplicate provider, model manager, commands, or settings files.
 
-## Try it
+## Install
 
-Requires Node.js >=22.19.0 and Pi 1.5.2. Not published yet.
+Requires Node.js >=22.19.0 and Pi 1.5.2.
+
+From npm, after publication:
+
+```bash
+pi install npm:pi-llama-reasoning
+```
+
+Keep your existing `/login llama.cpp` connection. Load a model through `/llama`, then select it through `/model`.
+
+To try a checkout without changing Pi settings:
 
 ```bash
 git clone https://github.com/Ryu-CZ/pi-llama-reasoning.git
 cd pi-llama-reasoning
 pi -e ./extensions/index.ts
-```
-
-Keep your existing `/login llama.cpp` connection. Load a model through `/llama`, then select it through `/model`.
-
-To keep the extension installed:
-
-```bash
-pi install /absolute/path/to/pi-llama-reasoning
 ```
 
 ## What changes

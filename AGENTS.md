@@ -15,8 +15,9 @@ Adds native reasoning effort selection to Pi's built-in llama.cpp integration.
 - `extensions/index.ts`: Pi lifecycle integration.
 - `extensions/lib/`: reasoning discovery and model transformation.
 - `tests/`: Node tests, including Pi loader/provider/serializer integration.
-- `README.md`: behavior, installation, limitations.
-- `CHANGELOG.md`: short, user-facing Keep a Changelog entries.
+- `README.md`: user installation, usage, practical limitations only.
+- `CHANGELOG.md`: short, user-facing Keep a Changelog entries only.
+- `vision.md`: high-level goal, scope, design decisions, technical details, development, verification.
 
 ## Checks
 
@@ -31,5 +32,6 @@ Use the package's pinned development versions. Do not claim compatibility with u
 ## Workflow
 
 - Commit each verified logical unit separately.
-- Update the changelog for user-visible changes, not internal test/setup work.
+- README and changelog are strictly for users. Put implementation details, developer instructions, design decisions, and verification notes in `vision.md`.
+- Update the changelog for user-visible changes, not internal test/setup work or documentation moves.
 - Do not publish, tag, push, install globally, or change live server presets unless asked.

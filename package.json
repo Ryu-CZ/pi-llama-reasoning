@@ -1,0 +1,38 @@
+{
+  "name": "pi-llama-reasoning",
+  "version": "0.1.0",
+  "description": "Adds reasoning levels from llama.cpp’s router to Pi’s thinking selector.",
+  "type": "module",
+  "keywords": ["pi-package", "pi-extension", "llama.cpp", "reasoning"],
+  "homepage": "https://github.com/Ryu-CZ/pi-llama-reasoning#readme",
+  "bugs": {
+    "url": "https://github.com/Ryu-CZ/pi-llama-reasoning/issues"
+  },
+  "license": "MIT",
+  "author": "Ryu-CZ",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ryu-CZ/pi-llama-reasoning.git"
+  },
+  "files": ["CHANGELOG.md", "extensions/", "LICENSE", "README.md"],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": ">=1.5.2 <1.6.0",
+    "@earendil-works/pi-coding-agent": ">=1.5.2 <1.6.0"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.5.2",
+    "@earendil-works/pi-coding-agent": "1.5.2",
+    "@types/node": "22.20.5",
+    "typescript": "7.0.2"
+  },
+  "pi": {
+    "extensions": ["./extensions/index.ts"]
+  }
+}

@@ -8,17 +8,7 @@ Keep using Pi’s existing connection, model picker, and `/llama` commands. No e
 
 llama.cpp reports the model’s reasoning levels, but Pi 1.5.2 doesn’t use that list. This extension adds them to Pi’s thinking selector and sends your choice to the model.
 
-Example: Qwen3.8-27B
-
-```text
-           Router reports: low, medium, xhigh
-                           │
-              ┌────────────┴────────────┐
-              ▼                         ▼
-           Pi alone              With this extension
-         off · medium        off · low · medium · xhigh
-        (thinking off/on)      (actual effort selection)
-```
+![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Token budgets stay unchanged.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
 Without the extension, Pi’s `medium` enables thinking but leaves the server’s effort setting unchanged. With it, `medium` selects the model’s medium effort. Token budgets stay separate.
 

@@ -11,9 +11,9 @@ A [Pi coding agent](https://pi.dev) extension that discovers your loaded llama.c
 
 - Choose the reasoning efforts reported by your llama.cpp router, such as `low`, `medium`, and `xhigh`.
 - Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration or replacement provider.
-- Leave token budgets, sampling settings, and explicit reasoning configuration unchanged.
+- Pair each effort with Pi’s thinking token budget while preserving custom budgets, sampling settings, and explicit reasoning configuration.
 
-![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Token budgets stay unchanged.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
+![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Screenshot predates automatic budget forwarding.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
 ## Install
 
@@ -34,14 +34,18 @@ Restart Pi after installing.
 ## Limits
 
 - Only discovers levels for loaded models that Pi already recognizes as reasoning-capable.
-- Keeps custom reasoning settings, token budgets, and sampling settings unchanged.
-- Server token limits still apply, even at `xhigh`.
+- Keeps custom reasoning settings, budget overrides, and sampling settings unchanged.
+- Per-request thinking budgets override the server’s default reasoning budget, not its total output or context limits.
 - **Restart Pi** after changing a model’s available reasoning levels; `/reload` won’t refresh them.
 - If discovery is unavailable, keeps Pi’s existing behavior.
 
 ## How it works
 
-With the extension, `medium` selects the model’s medium effort—not just thinking on. Token budgets stay separate.
+With the extension, `medium` selects the model’s medium effort—not just thinking on—and sends Pi’s corresponding thinking token budget.
+
+Pi 1.5.2 defaults to 2,048 thinking tokens for `low`, 8,192 for `medium`, and 16,384 for `high`, `xhigh`, or `max`, when those efforts are available. Custom `thinkingBudgets` settings are respected; `xhigh` and `max` use the `high` budget. Pi reduces budgets when needed to reserve answer space within the output limit.
+
+Effort and budget remain different controls: the model’s template interprets effort, while llama.cpp limits thinking tokens. Off mode keeps Pi’s existing thinking toggle and sends no budget.
 
 ```mermaid
 %%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%

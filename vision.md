@@ -12,7 +12,7 @@ Only add functionality missing from built-in Pi. Other integration gaps need evi
 
 - Discover native reasoning efforts for the selected, loaded router model.
 - Expose those efforts through Pi’s existing thinking selector.
-- Send the selected effort without changing token budgets or sampling.
+- Send the selected effort with Pi’s corresponding thinking token budget, without changing sampling or budget settings.
 - Preserve explicit reasoning configuration; fall back when discovery is unavailable.
 
 No changes to authentication, model loading, downloads, classifiers, or other providers.
@@ -53,7 +53,7 @@ sequenceDiagram
     end
 ```
 
-The injected `compat.chatTemplateKwargs` are metadata for Pi’s existing serializer, not a second HTTP client for generation. The extension also retains the Qwen toggle/preservation behavior where applicable. It does not change token budgets, sampling, the provider catalog, or persistent settings.
+The injected `compat.chatTemplateKwargs` are metadata for Pi’s existing serializer, not a second HTTP client for generation. The extension also retains the Qwen toggle/preservation behavior where applicable. It enables `compat.thinkingTokenBudgetField: "thinking_budget_tokens"` when neither an explicit budget field nor a legacy budget flag is configured. Pi’s serializer then sends the level’s resolved budget alongside its native effort. It does not change budget settings, sampling, the provider catalog, or persistent settings.
 
 Missing or unsupported capabilities and discovery failures leave the model unchanged. The loaded-status guard is best-effort: a shared router can change state between `/models` and `/props`. Generation in the diagram shows the intended request path; live generation remains unverified.
 
@@ -101,7 +101,8 @@ Selecting `medium` for the Qwen example sends:
     "enable_thinking": true,
     "preserve_thinking": true,
     "reasoning_effort": "medium"
-  }
+  },
+  "thinking_budget_tokens": 8192
 }
 ```
 
@@ -110,7 +111,9 @@ llama.cpp merges these kwargs over server defaults. No separate request-rewritin
 ### Keep effort, budgets, and off support separate
 
 - Native effort changes the template’s reasoning instructions; it is not a fixed token count.
-- Existing Pi budget fields and per-level sampling remain untouched. A server-side `--reasoning-budget 2048` still caps thinking at 2048 tokens at `xhigh`.
+- Enable Pi’s existing budget serializer rather than defining another effort-to-budget map. Pi 1.5.2 uses 1024 / 2048 / 8192 / 16384 for minimal / low / medium / high; xhigh and max share high’s budget. Custom `thinkingBudgets` are honored. Pi clamps the budget to reserve 1024 answer tokens under the output ceiling; if no positive budget remains, Pi omits the field.
+- A per-request `thinking_budget_tokens` value overrides llama.cpp’s `--reasoning-budget` default; it is not bounded by that default. Total output and context limits still apply.
+- Explicit budget fields, legacy `supportsThinkingTokenBudget` flags (including false), and per-level sampling overrides remain untouched. Pi merges sampling parameters last, so explicit request-body budget values win.
 - An effort list does not establish support for disabling thinking. Preserve Pi’s existing toggle; do not add a new one based on the list alone.
 
 ### Preserve explicit configuration
@@ -165,10 +168,10 @@ Project setup follows `pi-minimal-footer`: TypeScript under `extensions/`, Node 
 ## Verification
 
 - Pi 1.5.2; Node.js 22.19.0 and 26.10.0.
-- 22 passing tests, including real Pi integration against a local HTTP fixture.
+- Node tests, including real Pi integration against a local HTTP fixture: default and custom effort budgets, off mode, output-limit clamping, and explicit budget overrides.
 - Packed extension loaded through Pi’s loader.
 - Read-only discovery against a running llama.cpp router with Qwen3.8-27B reported `low`, `medium`, and `xhigh`.
-- Live model generation remains unverified.
+- Direct live router requests to Qwen3.8-27B with reasoning budgets 0 and 32 verified absent vs bounded reasoning content. Generation through Pi with the new automatic forwarding remains unverified.
 
 ## Next evidence needed
 

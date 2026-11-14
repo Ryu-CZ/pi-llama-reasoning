@@ -14,6 +14,7 @@ test("uses native efforts without inventing aliases or changing unrelated model 
   assert.equal(next.samplingParams, original.samplingParams);
   assert.equal(next.input, original.input);
   assert.equal(next.maxTokens, original.maxTokens);
+  assert.equal(next.compat.thinkingTokenBudgetField, "thinking_budget_tokens");
   assert.deepEqual(original, snapshot);
   assert.deepEqual(next.compat.chatTemplateKwargs, {
     enable_thinking: { $var: "thinking.enabled" },
@@ -28,14 +29,23 @@ test("effort-only templates do not acquire an off switch", () => {
   assert.equal(next.compat.chatTemplateKwargs.enable_thinking, undefined);
 });
 
-test("preserves independent token-budget and per-level sampling configuration", () => {
-  const original = model({
-    compat: { ...model().compat, thinkingTokenBudgetField: "thinking_budget_tokens" },
-    samplingParamsByThinkingLevel: { medium: { thinking_budget_tokens: 4096 } },
-  });
-  const next = withReasoningEfforts(original, props);
-  assert.equal(next.compat.thinkingTokenBudgetField, "thinking_budget_tokens");
-  assert.equal(next.samplingParamsByThinkingLevel, original.samplingParamsByThinkingLevel);
+test("preserves explicit token-budget fields, legacy flags and per-level sampling configuration", () => {
+  for (const budgetCompat of [
+    { thinkingTokenBudgetField: "thinking_budget_tokens" },
+    { thinkingTokenBudgetField: "thinking_budget" },
+    { thinkingTokenBudgetField: "thinking_token_budget" },
+    { supportsThinkingTokenBudget: true },
+    { supportsThinkingTokenBudget: false },
+  ]) {
+    const original = model({
+      compat: { ...model().compat, ...budgetCompat },
+      samplingParamsByThinkingLevel: { medium: { thinking_budget_tokens: 4096 } },
+    });
+    const next = withReasoningEfforts(original, props);
+    assert.equal(next.compat.thinkingTokenBudgetField, budgetCompat.thinkingTokenBudgetField);
+    assert.equal(next.compat.supportsThinkingTokenBudget, budgetCompat.supportsThinkingTokenBudget);
+    assert.equal(next.samplingParamsByThinkingLevel, original.samplingParamsByThinkingLevel);
+  }
 });
 
 test("leaves explicit reasoning configuration and other providers untouched", () => {

@@ -56,6 +56,10 @@ export function withReasoningEfforts(model: Model<Api>, props: unknown): ChatMod
     thinkingLevelMap,
     compat: {
       ...model.compat,
+      // Let Pi pair efforts with its budgets unless budget behavior was explicitly configured.
+      ...(model.compat?.thinkingTokenBudgetField === undefined && model.compat?.supportsThinkingTokenBudget === undefined
+        ? { thinkingTokenBudgetField: "thinking_budget_tokens" as const }
+        : {}),
       supportsReasoningEffort: false,
       thinkingFormat: "chat-template",
       chatTemplateKwargs: {

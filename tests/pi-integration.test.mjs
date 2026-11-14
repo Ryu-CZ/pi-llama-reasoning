@@ -107,8 +107,28 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
     assert.equal(payload.chat_template_kwargs.enable_thinking, level !== "off");
     assert.equal(payload.chat_template_kwargs.reasoning_effort, level === "off" ? undefined : level);
     assert.equal(payload.chat_template_kwargs.preserve_thinking, true);
-    assert.equal(payload.thinking_budget_tokens, undefined);
+    const budgets = { low: 2048, medium: 8192, xhigh: 16384 };
+    assert.equal(payload.thinking_budget_tokens, budgets[level]);
   }
+
+  session.agent.thinkingBudgets = { low: 1024, medium: 4096, high: 12288 };
+  for (const [level, budget] of [["low", 1024], ["medium", 4096], ["xhigh", 12288]]) {
+    session.setThinkingLevel(level);
+    await session.prompt("Hello with a custom budget.");
+    const payload = requests.filter((request) => request.body).at(-1).body;
+    assert.equal(payload.chat_template_kwargs.reasoning_effort, level);
+    assert.equal(payload.thinking_budget_tokens, budget);
+  }
+  session.agent.thinkingBudgets = undefined;
+
+  const enhanced = session.model;
+  await session.setModel({ ...enhanced, maxTokens: 4096 });
+  session.setThinkingLevel("xhigh");
+  await session.prompt("Hello with limited output room.");
+  const clamped = requests.filter((request) => request.body).at(-1).body;
+  assert.equal(clamped.max_tokens, 4096);
+  assert.equal(clamped.thinking_budget_tokens, 3072);
+
   await session.setModel(original);
   await session.prompt("Hello after a catalog replacement.");
   assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
@@ -124,7 +144,6 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
 
   await session.setModel({
     ...session.model,
-    compat: { ...session.model.compat, thinkingTokenBudgetField: "thinking_budget_tokens" },
     samplingParamsByThinkingLevel: { medium: { thinking_budget_tokens: 4096 } },
   });
   session.setThinkingLevel("medium");

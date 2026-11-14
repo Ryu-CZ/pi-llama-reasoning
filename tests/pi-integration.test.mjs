@@ -94,63 +94,81 @@ test("Pi loader, built-in provider, thinking selector and serializer work togeth
   const errors = [];
   await session.bindExtensions({ onError: (error) => errors.push(error) });
   assert.deepEqual(errors, []);
-  assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
-  assert.equal(runtime.getProvider("llama.cpp"), providerBefore);
-  assert.equal(runtime.getModel("llama.cpp", "qwen"), original);
-  assert.equal(runtime.getModelOfType("classifier", "llama.cpp", "qwen"), classifierBefore);
-
-  for (const level of ["low", "medium", "xhigh", "off"]) {
-    session.setThinkingLevel(level);
-    await session.prompt("Hello.");
-    assert.equal(session.getLastAssistantText(), "Hello.");
-    const payload = requests.filter((request) => request.body).at(-1).body;
-    assert.equal(payload.chat_template_kwargs.enable_thinking, level !== "off");
-    assert.equal(payload.chat_template_kwargs.reasoning_effort, level === "off" ? undefined : level);
-    assert.equal(payload.chat_template_kwargs.preserve_thinking, true);
-    const budgets = { low: 2048, medium: 8192, xhigh: 16384 };
-    assert.equal(payload.thinking_budget_tokens, budgets[level]);
-  }
-
-  session.agent.thinkingBudgets = { low: 1024, medium: 4096, high: 12288 };
-  for (const [level, budget] of [["low", 1024], ["medium", 4096], ["xhigh", 12288]]) {
-    session.setThinkingLevel(level);
-    await session.prompt("Hello with a custom budget.");
-    const payload = requests.filter((request) => request.body).at(-1).body;
-    assert.equal(payload.chat_template_kwargs.reasoning_effort, level);
-    assert.equal(payload.thinking_budget_tokens, budget);
-  }
-  session.agent.thinkingBudgets = undefined;
-
   const enhanced = session.model;
-  await session.setModel({ ...enhanced, maxTokens: 4096 });
-  session.setThinkingLevel("xhigh");
-  await session.prompt("Hello with limited output room.");
-  const clamped = requests.filter((request) => request.body).at(-1).body;
-  assert.equal(clamped.max_tokens, 4096);
-  assert.equal(clamped.thinking_budget_tokens, 3072);
+  function lastCompletionPayload() {
+    return requests.findLast((request) => request.path === "/v1/chat/completions").body;
+  }
 
-  await session.setModel(original);
-  await session.prompt("Hello after a catalog replacement.");
-  assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
+  await t.test("discovers native efforts without replacing the provider or catalog", () => {
+    assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
+    assert.equal(runtime.getProvider("llama.cpp"), providerBefore);
+    assert.equal(runtime.getModel("llama.cpp", "qwen"), original);
+    assert.equal(runtime.getModelOfType("classifier", "llama.cpp", "qwen"), classifierBefore);
+  });
 
-  await t.test("reload retains enhanced metadata instead of rediscovering changed capabilities", async () => {
+  await t.test("serializes native efforts, default budgets and off mode", async () => {
+    const budgets = { low: 2048, medium: 8192, xhigh: 16384 };
+    for (const level of ["low", "medium", "xhigh", "off"]) {
+      session.setThinkingLevel(level);
+      await session.prompt("Hello.");
+      assert.equal(session.getLastAssistantText(), "Hello.");
+      const payload = lastCompletionPayload();
+      assert.equal(payload.chat_template_kwargs.enable_thinking, level !== "off");
+      assert.equal(payload.chat_template_kwargs.reasoning_effort, level === "off" ? undefined : level);
+      assert.equal(payload.chat_template_kwargs.preserve_thinking, true);
+      assert.equal(payload.thinking_budget_tokens, budgets[level]);
+    }
+  });
+
+  await t.test("respects custom thinking budgets", async (t) => {
+    t.after(() => { session.agent.thinkingBudgets = undefined; });
+    session.agent.thinkingBudgets = { low: 1024, medium: 4096, high: 12288 };
+    for (const [level, budget] of [["low", 1024], ["medium", 4096], ["xhigh", 12288]]) {
+      session.setThinkingLevel(level);
+      await session.prompt("Hello with a custom budget.");
+      const payload = lastCompletionPayload();
+      assert.equal(payload.chat_template_kwargs.reasoning_effort, level);
+      assert.equal(payload.thinking_budget_tokens, budget);
+    }
+  });
+
+  await t.test("clamps the budget to leave room for the answer", async (t) => {
+    t.after(() => session.setModel(enhanced));
+    await session.setModel({ ...enhanced, maxTokens: 4096 });
+    session.setThinkingLevel("xhigh");
+    await session.prompt("Hello with limited output room.");
+    const payload = lastCompletionPayload();
+    assert.equal(payload.max_tokens, 4096);
+    assert.equal(payload.thinking_budget_tokens, 3072);
+  });
+
+  await t.test("rediscovers efforts after a catalog model replaces the active model", async () => {
+    await session.setModel(original);
+    await session.prompt("Hello after a catalog replacement.");
+    assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
+  });
+
+  await t.test("reload retains enhanced metadata instead of rediscovering changed capabilities", async (t) => {
+    t.after(() => { serverProps = props; });
     serverProps = { chat_template_caps: { supports_reasoning_effort: true, reasoning_effort_levels: ["low"] } };
     const before = requests.length;
     await session.reload();
     assert.equal(requests.length, before, "reload does not query the router");
     assert.deepEqual(session.getAvailableThinkingLevels(), ["off", "low", "medium", "xhigh"]);
-    serverProps = props;
   });
 
-  await session.setModel({
-    ...session.model,
-    samplingParamsByThinkingLevel: { medium: { thinking_budget_tokens: 4096 } },
+  await t.test("preserves explicit per-level request budget overrides", async (t) => {
+    t.after(() => session.setModel(enhanced));
+    await session.setModel({
+      ...enhanced,
+      samplingParamsByThinkingLevel: { medium: { thinking_budget_tokens: 4096 } },
+    });
+    session.setThinkingLevel("medium");
+    await session.prompt("Hello with a budget.");
+    const payload = lastCompletionPayload();
+    assert.equal(payload.chat_template_kwargs.reasoning_effort, "medium");
+    assert.equal(payload.thinking_budget_tokens, 4096);
   });
-  session.setThinkingLevel("medium");
-  await session.prompt("Hello with a budget.");
-  const budgeted = requests.filter((request) => request.body).at(-1).body;
-  assert.equal(budgeted.chat_template_kwargs.reasoning_effort, "medium");
-  assert.equal(budgeted.thinking_budget_tokens, 4096);
 
   assert.ok(requests.every((request) => request.headers.authorization === "Bearer fixture-key"));
   assert.deepEqual(errors, []);

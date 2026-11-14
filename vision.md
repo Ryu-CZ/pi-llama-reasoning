@@ -147,7 +147,8 @@ Do not relax override detection just to accept previously enhanced models; that 
 - `extensions/lib/reasoning.ts`: pure eligibility checks, capability validation, model transformation.
 - `extensions/lib/records.ts`: shared record guard for untrusted JSON; neither domain module depends on the other.
 - `tests/lifecycle.test.mjs`: lifecycle, stale results, cancellation, headers, fallback.
-- `tests/reasoning.test.mjs`: mapping, configuration preservation, discovery guards.
+- `tests/discovery.test.mjs`: loaded-status guard, URL prefixes, headers, HTTP failures.
+- `tests/reasoning.test.mjs`: effort mapping, configuration preservation, capability validation.
 - `tests/pi-integration.test.mjs`: actual Pi loader, built-in provider, selector, serializer, reload behavior.
 
 ## Development
@@ -194,6 +195,10 @@ The local description now names both native efforts and token budgets. Keep keyw
 ## Code readability
 
 The entry point uses `discovery` and `reasoning` module namespaces to distinguish network I/O from pure transformation. Lifecycle state names identify warned model IDs and pending discovery. Enhanced models already fail the eligibility check because their format is `chat-template`; a separate WeakSet tracked the same exclusion and has been removed. Authentication, cancellation, and active-model replacement stay in the Pi integration layer. Discovery returns raw `/props`, so its name is `fetchLoadedModelProps()`, not an effort parser. `QWEN_THINKING_MAP` names the specific built-in configuration used to detect overrides.
+
+The integration test keeps one real Pi session and local HTTP fixture, with named sequential subtests for discovery, default budgets/off, custom budgets, clamping, catalog replacement, reload, and explicit overrides. Temporary budget/model/server mutations are reset by subtest cleanup. Discovery tests live beside the module they exercise rather than mixing HTTP behavior into the pure transformation tests.
+
+The dead-code/test audit found no unused source exports or obsolete tests. Retained unit and integration overlap covers different boundaries: isolated decisions versus the actual Pi loader/provider/serializer. Strict TypeScript unused checks pass. Node coverage executes every source line (80.12% branch coverage); that supports reachability, not exhaustive branch coverage. All 28 reported tests pass; the increase from 22 comes from naming existing integration scenarios, not new feature coverage. These internal changes do not need a user-facing changelog entry.
 
 ## README review corrections
 

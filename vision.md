@@ -173,6 +173,22 @@ Project setup follows `pi-minimal-footer`: TypeScript under `extensions/`, Node 
 - Read-only discovery against a running llama.cpp router with Qwen3.8-27B reported `low`, `medium`, and `xhigh`.
 - Direct live router requests to Qwen3.8-27B with reasoning budgets 0 and 32 verified absent vs bounded reasoning content. Generation through Pi with the new automatic forwarding remains unverified.
 
+## Package discovery experiment
+
+A fresh Pi session in a neutral temporary directory searched public sources with extensions, MCP, skills, context files, and session persistence disabled. Its prompt described the selector-and-budget problem without naming this package or exposing repository metadata. This was one discovery trial, not a ranking benchmark.
+
+Initial queries, recorded before searching:
+
+- `Pi coding agent package llama.cpp reasoning thinking token budget`
+- `npm pi llama.cpp native reasoning efforts`
+- `github pi extension llama.cpp thinking selector reasoning budget`
+
+After web search hit challenge pages, it searched npm for `pi llama.cpp`, `keywords:pi-package llama`, and `pi reasoning`. It found `pi-llama-cpp` and `pi-reasoning-budget-selector`, but did not find this package or verify a complete native-effort-and-budget solution. Those candidate assessments are the worker’s findings, not an independent audit.
+
+Independent registry checks confirmed that npm still served version 0.1.1 with the old description and only `pi-package`, `pi-extension`, `llama.cpp`, and `reasoning` keywords. This package was absent from the first 250 results for each of the three npm queries; this does not establish absence from all results.
+
+The local description now names both native efforts and token budgets. Keywords add the worker’s search vocabulary: llama, native reasoning, reasoning/thinking budgets, thinking selector, and token budget. Publish the updated metadata and repeat a fresh blind trial before claiming improved discoverability.
+
 ## Next evidence needed
 
 - Live generation with each supported effort and off mode.

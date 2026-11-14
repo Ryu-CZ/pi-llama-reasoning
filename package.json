@@ -1,7 +1,7 @@
 {
   "name": "pi-llama-reasoning",
   "version": "0.1.1",
-  "description": "Pi extension that discovers native llama.cpp reasoning efforts, adds them to the thinking selector, and sends matching token budgets.",
+  "description": "Pi coding agent extension that discovers native llama.cpp reasoning efforts for the thinking selector and sends matching token budgets.",
   "type": "module",
   "keywords": [
     "llama.cpp",

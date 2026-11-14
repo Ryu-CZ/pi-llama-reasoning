@@ -1,19 +1,18 @@
-import type { Api, Model } from "@earendil-works/pi-ai";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { discoverEfforts, isAutomaticCandidate, withReasoningEfforts } from "./lib/reasoning.ts";
+import * as discovery from "./lib/discovery.ts";
+import * as reasoning from "./lib/reasoning.ts";
 
 export default function (pi: ExtensionAPI) {
-  const enhanced = new WeakSet<Model<Api>>();
-  const warned = new Set<string>();
-  let pending: AbortController | undefined;
+  const warnedModelIds = new Set<string>();
+  let pendingDiscovery: AbortController | undefined;
 
-  async function update(ctx: ExtensionContext) {
-    pending?.abort();
+  async function refreshReasoningEfforts(ctx: ExtensionContext) {
+    pendingDiscovery?.abort();
     const model = ctx.model;
-    if (!model || enhanced.has(model) || !isAutomaticCandidate(model)) return;
+    if (!model || !reasoning.isAutomaticCandidate(model)) return;
 
     const controller = new AbortController();
-    pending = controller;
+    pendingDiscovery = controller;
     const signals = [controller.signal, AbortSignal.timeout(3000)];
     if (ctx.signal) signals.push(ctx.signal);
     const signal = AbortSignal.any(signals);
@@ -29,30 +28,29 @@ export default function (pi: ExtensionAPI) {
       if (auth.apiKey && !hasAuthOverride) {
         headers.set("authorization", `Bearer ${auth.apiKey}`);
       }
-      const props = await discoverEfforts(auth.baseUrl ?? model.baseUrl, model.id, headers, signal);
+      const props = await discovery.fetchLoadedModelProps(auth.baseUrl ?? model.baseUrl, model.id, headers, signal);
       if (signal.aborted || ctx.model !== model) return;
-      const next = withReasoningEfforts(model, props);
-      if (!next) return;
+      const enhancedModel = reasoning.withReasoningEfforts(model, props);
+      if (!enhancedModel) return;
 
-      const level = pi.getThinkingLevel();
-      enhanced.add(next);
-      if (await pi.setModel(next)) pi.setThinkingLevel(level);
+      const thinkingLevel = pi.getThinkingLevel();
+      if (await pi.setModel(enhancedModel)) pi.setThinkingLevel(thinkingLevel);
     } catch {
-      if (!controller.signal.aborted && !ctx.signal?.aborted && !warned.has(model.id)) {
-        warned.add(model.id);
+      if (!controller.signal.aborted && !ctx.signal?.aborted && !warnedModelIds.has(model.id)) {
+        warnedModelIds.add(model.id);
         ctx.ui.notify("llama.cpp reasoning discovery failed; keeping Pi's existing settings.", "warning");
       }
     } finally {
-      if (pending === controller) pending = undefined;
+      if (pendingDiscovery === controller) pendingDiscovery = undefined;
     }
   }
 
-  pi.on("session_start", async (_event, ctx) => update(ctx));
-  pi.on("model_select", async (_event, ctx) => update(ctx));
+  pi.on("session_start", async (_event, ctx) => refreshReasoningEfforts(ctx));
+  pi.on("model_select", async (_event, ctx) => refreshReasoningEfforts(ctx));
   // /llama or another extension may replace the active model with a fresh catalog entry.
-  pi.on("before_agent_start", async (_event, ctx) => update(ctx));
+  pi.on("before_agent_start", async (_event, ctx) => refreshReasoningEfforts(ctx));
   pi.on("session_shutdown", () => {
-    pending?.abort();
-    pending = undefined;
+    pendingDiscovery?.abort();
+    pendingDiscovery = undefined;
   });
 }

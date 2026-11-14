@@ -126,7 +126,7 @@ This also means the extension cannot distinguish an explicit reasoning disable f
 
 - Discover at session start and model selection.
 - Reapply before a prompt when the active model has been replaced with a fresh catalog entry.
-- Cache enhanced model objects for the extension instance; do not query on every request.
+- Enhanced models use `chat-template`, so the candidate guard skips them; do not query on every request.
 - Use Pi’s resolved endpoint and credentials, including custom headers.
 - Bound discovery with a three-second timeout; cancel on model changes or shutdown.
 - Discard results if the active model changed while discovery was running.
@@ -143,7 +143,9 @@ Do not relax override detection just to accept previously enhanced models; that 
 ## Code map
 
 - `extensions/index.ts`: lifecycle hooks, authentication, cancellation, active-model replacement.
-- `extensions/lib/reasoning.ts`: candidate checks, capability discovery, model transformation.
+- `extensions/lib/discovery.ts`: HTTP discovery, loaded-status guard, endpoint paths.
+- `extensions/lib/reasoning.ts`: pure eligibility checks, capability validation, model transformation.
+- `extensions/lib/records.ts`: shared record guard for untrusted JSON; neither domain module depends on the other.
 - `tests/lifecycle.test.mjs`: lifecycle, stale results, cancellation, headers, fallback.
 - `tests/reasoning.test.mjs`: mapping, configuration preservation, discovery guards.
 - `tests/pi-integration.test.mjs`: actual Pi loader, built-in provider, selector, serializer, reload behavior.
@@ -188,6 +190,10 @@ After web search hit challenge pages, it searched npm for `pi llama.cpp`, `keywo
 Independent registry checks confirmed that npm still served version 0.1.1 with the old description and only `pi-package`, `pi-extension`, `llama.cpp`, and `reasoning` keywords. This package was absent from the first 250 results for each of the three npm queries; this does not establish absence from all results.
 
 The local description now names both native efforts and token budgets. Keep keywords focused and ordered by relevance: `llama.cpp`, `reasoning-effort`, `thinking-budget`, `reasoning`, `thinking`, `openai-api`, `pi-extension`, then the required gallery marker `pi-package`. The API keyword describes llama.cpp’s OpenAI-compatible endpoint, not a dependency on OpenAI’s hosted service. Avoid standalone budget/effort/token keywords and duplicate spellings. Publish the updated metadata and repeat a fresh blind trial before claiming improved discoverability.
+
+## Code readability
+
+The entry point uses `discovery` and `reasoning` module namespaces to distinguish network I/O from pure transformation. Lifecycle state names identify warned model IDs and pending discovery. Enhanced models already fail the eligibility check because their format is `chat-template`; a separate WeakSet tracked the same exclusion and has been removed. Authentication, cancellation, and active-model replacement stay in the Pi integration layer. Discovery returns raw `/props`, so its name is `fetchLoadedModelProps()`, not an effort parser. `QWEN_THINKING_MAP` names the specific built-in configuration used to detect overrides.
 
 ## README review corrections
 

@@ -1,7 +1,8 @@
 import type { Api, Model } from "@earendil-works/pi-ai";
+import { isRecord } from "./records.ts";
 
 const EFFORTS = ["minimal", "low", "medium", "high", "xhigh", "max"] as const;
-const BUILTIN_MAP = {
+const QWEN_THINKING_MAP = {
   off: "off",
   minimal: null,
   low: null,
@@ -19,8 +20,8 @@ export function isAutomaticCandidate(model: Model<Api>): model is ChatModel {
   if (compat?.supportsReasoningEffort || compat?.chatTemplateKwargs) return false;
   if (!model.thinkingLevelMap) return true;
   const entries = Object.entries(model.thinkingLevelMap);
-  return entries.length === Object.keys(BUILTIN_MAP).length && entries.every(
-    ([key, value]) => Object.hasOwn(BUILTIN_MAP, key) && value === BUILTIN_MAP[key as keyof typeof BUILTIN_MAP],
+  return entries.length === Object.keys(QWEN_THINKING_MAP).length && entries.every(
+    ([key, value]) => Object.hasOwn(QWEN_THINKING_MAP, key) && value === QWEN_THINKING_MAP[key as keyof typeof QWEN_THINKING_MAP],
   );
 }
 
@@ -69,30 +70,4 @@ export function withReasoningEfforts(model: Model<Api>, props: unknown): ChatMod
       },
     },
   };
-}
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export async function discoverEfforts(
-  baseUrl: string,
-  modelId: string,
-  headers: HeadersInit,
-  signal: AbortSignal,
-): Promise<unknown> {
-  const root = baseUrl.replace(/\/+$/, "").replace(/\/v1$/, "");
-  const get = async (url: URL) => {
-    const response = await fetch(url, { headers, signal, redirect: "error" });
-    if (!response.ok) throw new Error(`llama.cpp discovery returned HTTP ${response.status}`);
-    return response.json() as Promise<unknown>;
-  };
-  const catalog = await get(new URL(`${root}/models`));
-  if (!isRecord(catalog) || !Array.isArray(catalog.data)) return undefined;
-  const model = catalog.data.find((entry: unknown) => isRecord(entry) && entry.id === modelId);
-  // Querying /props can load an unloaded model or wake a sleeping one.
-  if (!isRecord(model) || !isRecord(model.status) || model.status.value !== "loaded") return undefined;
-  const url = new URL(`${root}/props`);
-  url.searchParams.set("model", modelId);
-  return get(url);
 }

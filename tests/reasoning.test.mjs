@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getSupportedThinkingLevels } from "@earendil-works/pi-ai/compat";
-import { discoverEfforts, withReasoningEfforts } from "../extensions/lib/reasoning.ts";
+import { fetchLoadedModelProps } from "../extensions/lib/discovery.ts";
+import { withReasoningEfforts } from "../extensions/lib/reasoning.ts";
 
 import { model, props } from "./helpers/model.mjs";
 
@@ -11,6 +12,7 @@ test("uses native efforts without inventing aliases or changing unrelated model 
   const next = withReasoningEfforts(original, props);
   assert.deepEqual(getSupportedThinkingLevels(next), ["off", "low", "medium", "xhigh"]);
   assert.equal(next.thinkingLevelMap.high, null);
+  assert.equal(withReasoningEfforts(next, props), undefined, "enhanced models are no longer automatic candidates");
   assert.equal(next.samplingParams, original.samplingParams);
   assert.equal(next.input, original.input);
   assert.equal(next.maxTokens, original.maxTokens);
@@ -79,7 +81,7 @@ test("checks router status before requesting model props and preserves URL prefi
       : props);
   });
   const signal = new AbortController().signal;
-  assert.deepEqual(await discoverEfforts("http://localhost:8080/proxy/v1/", "a/b + c", { Authorization: "Bearer test" }, signal), props);
+  assert.deepEqual(await fetchLoadedModelProps("http://localhost:8080/proxy/v1/", "a/b + c", { Authorization: "Bearer test" }, signal), props);
   assert.equal(calls[0].url, "http://localhost:8080/proxy/models");
   const url = new URL(calls[1].url);
   assert.equal(url.pathname, "/proxy/props");
@@ -96,14 +98,14 @@ for (const status of ["sleeping", "unloaded", "loading", "failed", undefined]) {
       calls++;
       return Response.json({ data: [{ id: "qwen", status: { value: status } }] });
     });
-    assert.equal(await discoverEfforts(model().baseUrl, "qwen", {}, new AbortController().signal), undefined);
+    assert.equal(await fetchLoadedModelProps(model().baseUrl, "qwen", {}, new AbortController().signal), undefined);
     assert.equal(calls, 1);
   });
 }
 
 test("HTTP errors are rejected without including credentials or response bodies", async (t) => {
   t.mock.method(globalThis, "fetch", async () => new Response("secret", { status: 401 }));
-  await assert.rejects(discoverEfforts(model().baseUrl, "qwen", {}, new AbortController().signal), {
+  await assert.rejects(fetchLoadedModelProps(model().baseUrl, "qwen", {}, new AbortController().signal), {
     message: "llama.cpp discovery returned HTTP 401",
   });
 });

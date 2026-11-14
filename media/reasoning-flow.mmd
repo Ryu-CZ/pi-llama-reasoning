@@ -1,0 +1,12 @@
+%%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
+sequenceDiagram
+    participant Pi
+    participant Ext as This extension
+    participant Router as llama.cpp
+    Pi->>Ext: Session start or model selected
+    Ext->>Router: GET /models: check loaded status
+    Router-->>Ext: Selected model is loaded
+    Ext->>Router: GET /props: discover native efforts
+    Router-->>Ext: low, medium, xhigh (example)
+    Ext->>Pi: Enable native efforts and Pi budgets
+    Pi->>Router: Prompt + chosen effort + Pi budget

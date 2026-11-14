@@ -47,17 +47,8 @@ Pi 1.5.2 defaults to 2,048 thinking tokens for `low`, 8,192 for `medium`, and 16
 
 Effort and budget remain different controls: the model’s template interprets effort, while llama.cpp limits thinking tokens. Off mode keeps Pi’s existing thinking toggle and sends no budget.
 
-```mermaid
-%%{init: {"fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
-sequenceDiagram
-    participant Pi
-    participant Ext as This extension
-    participant Router as llama.cpp
-    Pi->>Ext: Model selected
-    Ext->>Router: Discover supported levels
-    Router-->>Ext: low, medium, xhigh (example)
-    Ext->>Pi: Add levels to thinking selector
-    Pi->>Router: Send prompt with chosen effort
-```
+For an eligible, loaded model:
+
+![Pi asks the extension to discover reasoning efforts. The extension checks that the selected model is loaded, reads its native efforts, and enables them with Pi’s thinking budgets. Pi sends the prompt with the chosen effort and budget.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/reasoning-flow.png)
 
 See [vision.md](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md) for the detailed flow, design decisions, and implementation details.

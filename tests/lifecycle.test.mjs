@@ -127,6 +127,30 @@ test("shutdown aborts discovery without applying a model or reporting an error",
   assert.deepEqual(f.notifications, []);
 });
 
+test("the discovery timeout cancels the request and warns once per model", async (t) => {
+  const timeouts = [];
+  let timeoutController;
+  t.mock.method(AbortSignal, "timeout", (duration) => {
+    timeouts.push(duration);
+    timeoutController = new AbortController();
+    return timeoutController.signal;
+  });
+  t.mock.method(globalThis, "fetch", async (_url, init) => {
+    timeoutController.abort();
+    if (init.signal.aborted) throw init.signal.reason;
+    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true }));
+  });
+  const f = fixture();
+  const original = f.ctx.model;
+  await f.emit("session_start");
+  await f.emit("before_agent_start");
+  assert.deepEqual(timeouts, [3000, 3000]);
+  assert.equal(f.ctx.model, original);
+  assert.equal(f.replacements.length, 0);
+  assert.equal(f.notifications.length, 1);
+  assert.equal(f.notifications[0][1], "warning");
+});
+
 test("discovery errors keep the original model and warn only once per model", async (t) => {
   t.mock.method(globalThis, "fetch", async () => { throw new Error("secret server details"); });
   const f = fixture();

@@ -2,6 +2,8 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import * as discovery from "./lib/discovery.ts";
 import * as reasoning from "./lib/reasoning.ts";
 
+const DISCOVERY_TIMEOUT_MS = 3000;
+
 export default function (pi: ExtensionAPI) {
   const warnedModelIds = new Set<string>();
   let pendingDiscovery: AbortController | undefined;
@@ -13,7 +15,7 @@ export default function (pi: ExtensionAPI) {
 
     const controller = new AbortController();
     pendingDiscovery = controller;
-    const signals = [controller.signal, AbortSignal.timeout(3000)];
+    const signals = [controller.signal, AbortSignal.timeout(DISCOVERY_TIMEOUT_MS)];
     if (ctx.signal) signals.push(ctx.signal);
     const signal = AbortSignal.any(signals);
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Improve Pi package index discoverability with clearer keywords, description, README overview, and a preview image.
+
 ## [0.1.1] - 2026-11-13
 
 ### Added

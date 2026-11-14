@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Remove the outdated “Token budgets unchanged” claim from the README preview.
 - Clarify which router-reported effort labels are supported and when Pi’s controls stay unchanged.
+- Name `/thinking` in the usage steps so the reasoning selector is easy to find.
 - Render the README flow diagram as an image so it displays on the Pi package index and stays readable in both page themes.
 - Send Pi’s thinking token budget with each native llama.cpp effort, respecting custom budgets and explicit overrides.
 - Improve Pi package index discoverability with clearer keywords, description, README overview, and a preview image.

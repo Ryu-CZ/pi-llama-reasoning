@@ -29,7 +29,7 @@ Restart Pi after installing.
 
 1. Connect to your router with `/login llama.cpp` if you haven’t already.
 2. Load a model through `/llama`, then select it through `/model`.
-3. Choose a reasoning level in Pi’s thinking selector.
+3. Run `/thinking`, then choose a reasoning level.
 
 ## Limits
 

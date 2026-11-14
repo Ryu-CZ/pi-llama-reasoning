@@ -11,7 +11,7 @@ A [Pi coding agent](https://pi.dev) extension that discovers your loaded llama.c
 
 - Choose the reasoning efforts reported by your llama.cpp router, such as `low`, `medium`, and `xhigh`.
 - Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration or replacement provider.
-- Fix missing reasoning budgets: Pi’s built-in llama.cpp integration does not send a token budget when you select a thinking level. This extension sends Pi’s matching budget with each request.
+- Pair each effort with Pi’s thinking token budget while preserving custom budgets, sampling settings, and explicit reasoning configuration.
 
 ![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Screenshot predates automatic budget forwarding.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 

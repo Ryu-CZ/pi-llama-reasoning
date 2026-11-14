@@ -34,6 +34,7 @@ Restart Pi after installing.
 ## Limits
 
 - Only discovers levels for loaded models that Pi already recognizes as reasoning-capable.
+- Requires router-reported efforts using `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`. Missing reports or any custom label leave Pi unchanged.
 - Keeps custom reasoning settings, budget overrides, and sampling settings unchanged.
 - Per-request thinking budgets override the server’s default reasoning budget, not its total output or context limits.
 - **Restart Pi** after changing a model’s available reasoning levels; `/reload` won’t refresh them.

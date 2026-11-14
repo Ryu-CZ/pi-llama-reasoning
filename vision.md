@@ -191,6 +191,7 @@ The local description now names both native efforts and token budgets. Keep keyw
 
 ## README review corrections
 
+- Documented the all-or-nothing label check in `withReasoningEfforts()`: require `supports_reasoning_effort: true` and a nonempty list containing only Pi-supported effort labels. A mixed list such as `["low", "custom"]` rejects the enhancement, not just the custom entry. Existing malformed-report tests cover this fallback.
 - Removed the obsolete budget footer from `media/preview.png` with a bottom crop (1600×900 → 1600×800). Visually checked that the model/version caption and selector comparison remain intact. Removed the historical disclaimer from its README alt text; budget behavior is described in the text, not the image.
 
 ## Next evidence needed

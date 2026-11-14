@@ -189,6 +189,10 @@ Independent registry checks confirmed that npm still served version 0.1.1 with t
 
 The local description now names both native efforts and token budgets. Keep keywords focused and ordered by relevance: `llama.cpp`, `reasoning-effort`, `thinking-budget`, `reasoning`, `thinking`, `openai-api`, `pi-extension`, then the required gallery marker `pi-package`. The API keyword describes llama.cpp’s OpenAI-compatible endpoint, not a dependency on OpenAI’s hosted service. Avoid standalone budget/effort/token keywords and duplicate spellings. Publish the updated metadata and repeat a fresh blind trial before claiming improved discoverability.
 
+## README review corrections
+
+- Removed the obsolete budget footer from `media/preview.png` with a bottom crop (1600×900 → 1600×800). Visually checked that the model/version caption and selector comparison remain intact. Removed the historical disclaimer from its README alt text; budget behavior is described in the text, not the image.
+
 ## Next evidence needed
 
 - Live generation with each supported effort and off mode.

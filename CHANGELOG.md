@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Remove the outdated “Token budgets unchanged” claim from the README preview.
 - Render the README flow diagram as an image so it displays on the Pi package index and stays readable in both page themes.
 - Send Pi’s thinking token budget with each native llama.cpp effort, respecting custom budgets and explicit overrides.
 - Improve Pi package index discoverability with clearer keywords, description, README overview, and a preview image.

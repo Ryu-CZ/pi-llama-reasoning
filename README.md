@@ -13,7 +13,7 @@ A [Pi coding agent](https://pi.dev) extension that discovers your loaded llama.c
 - Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration or replacement provider.
 - Pair each effort with Pi’s thinking token budget while preserving custom budgets, sampling settings, and explicit reasoning configuration.
 
-![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Screenshot predates automatic budget forwarding.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
+![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
 ## Install
 

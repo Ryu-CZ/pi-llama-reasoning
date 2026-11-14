@@ -136,8 +136,8 @@ test("the discovery timeout cancels the request and warns once per model", async
     return timeoutController.signal;
   });
   t.mock.method(globalThis, "fetch", async (_url, init) => {
-    timeoutController.abort();
-    if (init.signal.aborted) throw init.signal.reason;
+    assert.equal(init.signal.aborted, false);
+    queueMicrotask(() => timeoutController.abort(new DOMException("Discovery timed out", "TimeoutError")));
     return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true }));
   });
   const f = fixture();
@@ -147,8 +147,9 @@ test("the discovery timeout cancels the request and warns once per model", async
   assert.deepEqual(timeouts, [3000, 3000]);
   assert.equal(f.ctx.model, original);
   assert.equal(f.replacements.length, 0);
-  assert.equal(f.notifications.length, 1);
-  assert.equal(f.notifications[0][1], "warning");
+  assert.deepEqual(f.notifications, [[
+    "llama.cpp reasoning discovery failed; keeping Pi's existing settings.", "warning",
+  ]]);
 });
 
 test("discovery errors keep the original model and warn only once per model", async (t) => {

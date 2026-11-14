@@ -7,9 +7,11 @@
   <a href="https://pi.dev/packages/pi-llama-reasoning"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
 </p>
 
-Use your llama.cpp model’s **native reasoning levels** in Pi’s existing thinking selector—not just thinking on/off.
+A [Pi coding agent](https://pi.dev) extension that discovers your loaded llama.cpp model’s **native reasoning effort levels** and adds them to Pi’s built-in thinking selector—not just thinking on/off.
 
-Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration.
+- Choose the reasoning efforts reported by your llama.cpp router, such as `low`, `medium`, and `xhigh`.
+- Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration or replacement provider.
+- Leave token budgets, sampling settings, and explicit reasoning configuration unchanged.
 
 ![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh. Token budgets stay unchanged.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 

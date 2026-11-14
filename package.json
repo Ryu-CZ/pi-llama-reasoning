@@ -1,9 +1,20 @@
 {
   "name": "pi-llama-reasoning",
   "version": "0.1.1",
-  "description": "Adds reasoning levels from llama.cpp’s router to Pi’s thinking selector.",
+  "description": "Pi extension that discovers native llama.cpp reasoning effort levels and adds them to the built-in thinking selector.",
   "type": "module",
-  "keywords": ["pi-package", "pi-extension", "llama.cpp", "reasoning"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi-coding-agent",
+    "llama.cpp",
+    "llama-cpp",
+    "llama-server",
+    "reasoning",
+    "reasoning-effort",
+    "thinking",
+    "local-llm"
+  ],
   "homepage": "https://github.com/Ryu-CZ/pi-llama-reasoning#readme",
   "bugs": {
     "url": "https://github.com/Ryu-CZ/pi-llama-reasoning/issues"
@@ -33,6 +44,7 @@
     "typescript": "7.0.2"
   },
   "pi": {
+    "image": "https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png",
     "extensions": ["./extensions/index.ts"]
   }
 }

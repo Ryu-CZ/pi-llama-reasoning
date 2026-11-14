@@ -187,7 +187,7 @@ After web search hit challenge pages, it searched npm for `pi llama.cpp`, `keywo
 
 Independent registry checks confirmed that npm still served version 0.1.1 with the old description and only `pi-package`, `pi-extension`, `llama.cpp`, and `reasoning` keywords. This package was absent from the first 250 results for each of the three npm queries; this does not establish absence from all results.
 
-The local description now names both native efforts and token budgets. Keywords add the worker’s search vocabulary: llama, native reasoning, reasoning/thinking budgets, thinking selector, and token budget. Publish the updated metadata and repeat a fresh blind trial before claiming improved discoverability.
+The local description now names both native efforts and token budgets. Keep keywords minimal and ordered by relevance: `llama.cpp`, `reasoning`, `thinking`, `thinking-budget`, then the required gallery marker `pi-package`. Avoid generic package labels and duplicate spellings. Publish the updated metadata and repeat a fresh blind trial before claiming improved discoverability.
 
 ## Next evidence needed
 

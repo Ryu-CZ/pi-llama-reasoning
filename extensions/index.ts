@@ -2,6 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import * as discovery from "./lib/discovery.ts";
 import * as reasoning from "./lib/reasoning.ts";
 
+// Optional discovery should not hold up startup or prompting for Pi's full request timeout.
 const DISCOVERY_TIMEOUT_MS = 3000;
 
 export default function (pi: ExtensionAPI) {

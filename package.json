@@ -3,7 +3,16 @@
   "version": "0.1.1",
   "description": "Pi extension that discovers native llama.cpp reasoning efforts, adds them to the thinking selector, and sends matching token budgets.",
   "type": "module",
-  "keywords": ["llama.cpp", "reasoning", "thinking", "thinking-budget", "pi-package"],
+  "keywords": [
+    "llama.cpp",
+    "reasoning-effort",
+    "thinking-budget",
+    "reasoning",
+    "thinking",
+    "openai-api",
+    "pi-extension",
+    "pi-package"
+  ],
   "homepage": "https://github.com/Ryu-CZ/pi-llama-reasoning#readme",
   "bugs": {
     "url": "https://github.com/Ryu-CZ/pi-llama-reasoning/issues"

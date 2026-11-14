@@ -48,7 +48,7 @@ Pi 1.5.2 defaults to 2,048 thinking tokens for `low`, 8,192 for `medium`, and 16
 Effort and budget remain different controls: the model’s template interprets effort, while llama.cpp limits thinking tokens. Off mode keeps Pi’s existing thinking toggle and sends no budget.
 
 ```mermaid
-%%{init: {"theme": "neutral", "fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
+%%{init: {"fontFamily": "monospace", "sequence": {"width": 200, "mirrorActors": false}}}%%
 sequenceDiagram
     participant Pi
     participant Ext as This extension

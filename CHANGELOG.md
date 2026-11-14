@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Let the README diagram follow the page theme so labels remain readable on dark backgrounds.
 - Send Pi’s thinking token budget with each native llama.cpp effort, respecting custom budgets and explicit overrides.
 - Improve Pi package index discoverability with clearer keywords, description, README overview, and a preview image.
 

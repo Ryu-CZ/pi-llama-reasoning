@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Automatically pin Pi sessions to separate llama.cpp slots when available, preserving explicit slot and cache settings.
+- Inspect server slot activity and local session assignments with `/llama-slots`.
+
 ## [0.1.3] - 2026-11-16
 
 ### Changed

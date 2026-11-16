@@ -11,11 +11,12 @@ function fixture(original = model()) {
   let level = "medium";
   const ctx = {
     model: original,
-    ui: { notify: (...args) => notifications.push(args) },
+    ui: { notify: (...args) => notifications.push(args), setStatus() {} },
     modelRegistry: { getApiKeyAndHeaders: async () => ({ ok: true, apiKey: "test", headers: { "X-Test": "yes", removed: null } }) },
   };
   const pi = {
-    on: (event, handler) => handlers.set(event, handler),
+    on: (event, handler) => handlers.set(event, [...(handlers.get(event) ?? []), handler]),
+    registerCommand() {},
     getThinkingLevel: () => level,
     setThinkingLevel: (value) => { level = value; },
     setModel: async (next) => {
@@ -29,7 +30,7 @@ function fixture(original = model()) {
   return {
     ctx, notifications, replacements,
     get level() { return level; },
-    emit: (name) => handlers.get(name)({}, ctx),
+    emit: async (name) => { for (const handler of handlers.get(name) ?? []) await handler({}, ctx); },
   };
 }
 

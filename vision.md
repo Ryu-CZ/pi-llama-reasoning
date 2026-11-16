@@ -14,10 +14,11 @@ Only add functionality missing from built-in Pi. Other integration gaps need evi
 - Expose those efforts through Pi’s existing thinking selector.
 - Send the selected effort with Pi’s corresponding thinking token budget, without changing sampling or budget settings.
 - Preserve explicit reasoning configuration; fall back when discovery is unavailable.
+- Automatically pin sessions to available server slots and expose read-only slot inspection.
 
 No changes to authentication, model loading, downloads, classifiers, or other providers.
 
-## Planned scope: session slot pinning
+## Session slot pinning
 
 ### Problem
 
@@ -25,29 +26,41 @@ Two Pi sessions using the same llama.cpp model can displace each other’s cache
 
 Multiple slots, parallel requests, continuous batching, and unified KV cache do not establish session-to-slot affinity. Idle-slot caching helps retain prefixes but is a separate mechanism.
 
-### Proposed solution
+### Solution
 
-Add opt-in slot pinning to this extension while retaining Pi’s built-in provider and generation transport:
+Enable pinning automatically when the selected loaded model exposes valid slot information. Retain Pi’s built-in provider and generation transport:
 
 - Discover the actual slot count for the selected, loaded model without loading or waking models.
 - Assign each participating Pi session a stable slot, coordinated across Pi processes for the same server and model. Hashing session IDs modulo slot count is not sufficient: two sessions can collide.
 - Use `before_provider_request` to add `id_slot` and enable `cache_prompt` when not explicitly configured. Preserve explicit request values; account for explicit slot assignments when allocating automatic ones.
 - Keep the assignment across turns. Release it when no longer needed and recover abandoned assignments after crashes. Revalidate after server/model changes.
-- If discovery fails or no slot is available, report that pinning is unavailable. Never silently claim isolation or assign a slot already leased to another participating session. Define whether to wait, reject, or explicitly allow unpinned requests before implementation.
+- If discovery fails or no slot is available, keep the request unchanged and warn that pinning is unavailable. Never silently claim isolation or automatically assign a slot already leased to another participating session. Explicit conflicting assignments remain unchanged and produce a warning; they can bypass cooperative ownership.
 
 This coordinates participating extension instances, not arbitrary clients. Other clients can still target the same slots. Pinning also cannot prevent eviction under shared KV memory pressure, model reloads, or cache changes caused by differences in the serialized prompt. It is not a reservation of context capacity or a replacement for server cache configuration.
 
 ### Make slot usage inspectable
 
-Expose a read-only view of the selected model’s server slots alongside the extension’s session assignments. Show slot ID, busy/idle state, context limit, reported prompt/cache counters, and which slots are leased by participating Pi sessions. Keep server observations separate from local lease ownership: llama.cpp’s slot response does not identify the owning Pi session. Label unavailable or stale observations rather than implying a reservation or reporting zero usage.
+`/llama-slots` exposes a read-only view of the selected model’s server slots alongside the extension’s session assignments. Show slot ID, busy/idle state, context limit, reported prompt/cache counters, and which slots are leased by participating Pi sessions. Keep server observations separate from local lease ownership: llama.cpp’s slot response does not identify the owning Pi session. Label unavailable or stale observations rather than implying a reservation or reporting zero usage.
 
-Use the model-specific router endpoint `GET /slots?model=…`; `/props?model=…` reports `total_slots` and whether the slots endpoint is enabled. Do not enable endpoints, change server settings, or load models just to inspect them. The exact Pi command/UI remains to be decided.
+Use the model-specific router endpoint `GET /slots?model=…`; `/props?model=…` reports `total_slots` and whether the slots endpoint is enabled. Do not enable endpoints, change server settings, or load models just to inspect them. The footer shows the assigned slot or fallback state. Inspection neither allocates nor releases leases.
 
-### Evidence required before shipping
+### Coordination and lifecycle
 
-Verify `id_slot`, `cache_prompt`, slot discovery, and model-specific routing against the supported llama.cpp server build. Test two independent Pi processes alternating requests to one model: distinct slot assignments must remain stable, and server metrics/logs must show reuse of each session’s unchanged prefix after the other session runs. Also test simultaneous allocation, explicit assignments, exhausted slots, crashes, and server/model restarts. Do not describe pinning as a complete cache fix without that evidence.
+Each request discovers the loaded model’s current slot count and state, with a three-second network deadline and Pi’s resolved endpoint, credentials, and headers. Reject malformed or inconsistent reports. Skip newly claimed busy slots; retain an existing assignment even while it is busy. Discovery is independent of reasoning support.
 
-This is planned work, not current behavior. No provider replacement, global settings writes, model loading, or live server changes are needed.
+A lazily opened SQLite database at `$XDG_CACHE_HOME/pi-llama-reasoning/slots.sqlite` (default `~/.cache/pi-llama-reasoning/slots.sqlite`) coordinates participating processes using atomic transactions. Node’s built-in SQLite needs no package dependency; Node 22 may emit an experimental warning when first used. Scope keys hash the normalized router URL and model ID; localhost and 127.0.0.1 are normalized together. Other aliases, separate user caches, machines, or PID namespaces are outside this coordination boundary. No prompts or credentials are stored. Existing cache paths are trusted; use a private local user cache, not an untrusted or cross-host shared directory. SQLite write contention has a 200 ms budget rather than blocking Pi for seconds.
+
+Each extension instance has a unique owner token, including separate sessions in one PID. Release its lease on model changes and shutdown, including reload/session replacement. On allocation, reclaim leases only when their PID is definitely dead; permission errors and PID reuse conservatively retain ownership. No timer expires a live owner. A session switch or changed endpoint/model scope releases previous ownership. Server changes are revalidated on the next request, but a restart can still race that observation.
+
+The tested llama.cpp build wraps explicit nonnegative slot IDs modulo its slot count. Normalize only the lease lookup; preserve the original outgoing ID. Preserve explicit `cache_prompt` values, including false; add true only when absent. An explicit automatic-selection value such as `id_slot: -1` bypasses pinning. Later payload-rewriting extensions can still override this extension’s result.
+
+No provider replacement, global settings writes, model loading, or live server changes are needed. Unpinned fallback is deliberate: it preserves Pi availability but can displace a pinned session’s cache. This is not a server-side reservation or strict isolation.
+
+### Verification and remaining evidence
+
+Tests cover concurrent allocation by independent child processes, stable ownership, exhaustion, explicit conflicts, busy slots, crash recovery, rollback, and cleanup. A local HTTP fixture with Pi’s real loader/provider/serializer verifies two independent session runtimes forwarding alternating slot IDs 0/1/0/1, explicit request settings, and a changed server slot count. This is not a live two-slot llama.cpp test.
+
+Still required: two independent Pi processes alternating requests against a multi-slot llama.cpp model, with server metrics/logs proving each session reuses its prefix after the other runs. The current live model has one slot; changing its preset or restarting it requires separate approval. Do not describe pinning as a complete cache fix.
 
 ### Local inspection and request test
 
@@ -58,7 +71,9 @@ Tested the running router at `http://127.0.0.1:7484` with loaded model `Qwen3.8-
 - A 64-output-token chat request through the router accepted `id_slot: 0` and `cache_prompt: true`. Inspection observed slot 0 change from idle to busy and back to idle. The response reported 28 prompt tokens and zero cached tokens.
 - Idle snapshots reported zero processed/cache counters even though a prompt token count remained. These counters must not be presented as total resident KV usage or total RAM prompt-cache occupancy.
 
-This verifies inspectability and acceptance of the request fields, not distinct-slot routing or cache isolation: only one slot exists, and an unpinned request would also use slot 0. Multi-slot assignment, cache reuse, and extension integration remain unverified. No presets, loaded-model set, or server processes were changed; the generation test did change slot/cache state.
+After implementation, a real Pi 1.5.2 session loaded this extension and made two short requests to the same live model. Both outgoing requests carried `id_slot: 0` and `cache_prompt: true`; both returned `OK`. Pi reported 690 uncached input tokens on the first request and 691 cache-read tokens with 19 new input tokens on the follow-up. The `/llama-slots` command reported slot 0 idle, its context/prompt counters, and this session’s lease. The session used a temporary cache directory and released its lease at shutdown.
+
+This verifies live Pi integration, inspectability, and single-session cache reuse—not distinct-slot routing or two-session cache isolation. Only one slot exists, and an unpinned request could also reuse its prefix. No presets, loaded-model set, or server processes were changed; generation tests did change slot/cache state.
 
 ## Information flow
 
@@ -149,7 +164,7 @@ Selecting `medium` for the Qwen example sends:
 }
 ```
 
-llama.cpp merges these kwargs over server defaults. No separate request-rewriting hook is needed.
+llama.cpp merges these kwargs over server defaults. Reasoning forwarding needs no separate request-rewriting hook; slot pinning uses the payload hook independently.
 
 ### Keep effort, budgets, and off support separate
 
@@ -186,13 +201,19 @@ Do not relax override detection just to accept previously enhanced models; that 
 ## Code map
 
 - `extensions/index.ts`: lifecycle hooks, authentication, cancellation, active-model replacement.
-- `extensions/lib/discovery.ts`: HTTP discovery, loaded-status guard, endpoint paths.
+- `extensions/lib/discovery.ts`: HTTP discovery, loaded-status guard, slot validation, endpoint paths.
+- `extensions/lib/connection.ts`: shared resolution of Pi’s endpoint, credentials, and headers.
+- `extensions/lib/slots.ts`: request pinning, lifecycle cleanup, footer state, `/llama-slots` inspection.
+- `extensions/lib/slot-leases.ts`: atomic cross-process slot ownership and dead-process reclamation.
 - `extensions/lib/reasoning.ts`: pure eligibility checks, capability validation, model transformation.
 - `extensions/lib/records.ts`: shared record guard for untrusted JSON; neither domain module depends on the other.
 - `tests/lifecycle.test.mjs`: lifecycle, stale results, cancellation, headers, fallback.
 - `tests/discovery.test.mjs`: loaded-status guard, URL prefixes, headers, HTTP failures.
 - `tests/reasoning.test.mjs`: effort mapping, configuration preservation, capability validation.
 - `tests/pi-integration.test.mjs`: actual Pi loader, built-in provider, selector, serializer, reload behavior.
+- `tests/slots.test.mjs`: slot payloads, discovery validation, stale results, deadlines, cleanup, inspection.
+- `tests/slot-leases.test.mjs`: independent-process allocation, conflicts, crashes, lock contention, rollback.
+- `tests/slot-pi-integration.test.mjs`: real Pi session runtimes forwarding slots through the built-in provider.
 
 ## Development
 
@@ -214,6 +235,7 @@ Project setup follows `pi-minimal-footer`: TypeScript under `extensions/`, Node 
 ## Verification
 
 - Pi 1.5.2; Node.js 22.19.0 and 26.10.0.
+- Slot implementation: all 54 tests passed on both Node versions; `npm run check`, `npm pack --dry-run`, and `git diff --check` passed. Live single-slot generation and inspection verified as described above; multi-slot live isolation remains unverified.
 - Node tests, including real Pi integration against a local HTTP fixture: default and custom effort budgets, off mode, output-limit clamping, and explicit budget overrides.
 - Packed extension loaded through Pi’s loader.
 - Read-only discovery against a running llama.cpp router with Qwen3.8-27B reported `low`, `medium`, and `xhigh`.

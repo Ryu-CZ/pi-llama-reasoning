@@ -12,6 +12,7 @@ A [Pi coding agent](https://pi.dev) extension that discovers your loaded llama.c
 - Choose the reasoning efforts reported by your llama.cpp router, such as `low`, `medium`, and `xhigh`.
 - Keep using Pi’s connection, model picker, and `/llama` commands. No extra configuration or replacement provider.
 - Pair each effort with Pi’s thinking token budget while preserving custom budgets, sampling settings, and explicit reasoning configuration.
+- Automatically keep sessions on separate llama.cpp slots when available; inspect usage with `/llama-slots`.
 
 ![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
@@ -30,6 +31,18 @@ Restart Pi after installing.
 1. Connect to your router with `/login llama.cpp` if you haven’t already.
 2. Load a model through `/llama`, then select it through `/model`.
 3. Run `/thinking`, then choose a reasoning level.
+
+## Session slots
+
+Slot pinning enables automatically when the loaded model exposes its slots. Each participating Pi session keeps a stable slot across turns, reducing cache displacement when agents share one model. No extra Pi configuration is needed.
+
+Run `/llama-slots` to see busy/idle slots, prompt/cache counters, and local session assignments. The footer shows this session’s assigned slot or why it is unpinned.
+
+- The server must expose slots (`--slots`); multiple sessions need multiple slots (`--parallel`). This extension does not change server settings.
+- Coordination covers extension instances sharing the same user cache on one machine, router URL, and model ID—not other clients or machines.
+- If inspection or coordination fails, or all slots are busy or leased, requests continue unchanged with a warning. **This is best-effort cache affinity, not strict isolation:** unpinned or external clients can still displace cached prefixes.
+- Explicit slot and cache settings are preserved. Pinning cannot prevent cache eviction under memory pressure or model reloads.
+- Prompt/cache counters are snapshots, not total KV memory usage. A single-slot model cannot isolate multiple sessions.
 
 ## Limits
 

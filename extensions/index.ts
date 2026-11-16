@@ -1,11 +1,14 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import * as discovery from "./lib/discovery.ts";
 import * as reasoning from "./lib/reasoning.ts";
+import { resolveConnection } from "./lib/connection.ts";
+import { registerSlotPinning } from "./lib/slots.ts";
 
 // Optional discovery should not hold up startup or prompting for Pi's full request timeout.
 const DISCOVERY_TIMEOUT_MS = 3000;
 
 export default function (pi: ExtensionAPI) {
+  registerSlotPinning(pi);
   const warnedModelIds = new Set<string>();
   let pendingDiscovery: AbortController | undefined;
 
@@ -21,17 +24,9 @@ export default function (pi: ExtensionAPI) {
     const signal = AbortSignal.any(signals);
 
     try {
-      const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
-      if (!auth.ok || signal.aborted) return;
-      const headers = new Headers();
-      for (const [key, value] of Object.entries(auth.headers ?? {})) {
-        if (value !== null) headers.set(key, value);
-      }
-      const hasAuthOverride = Object.keys(auth.headers ?? {}).some((key) => key.toLowerCase() === "authorization");
-      if (auth.apiKey && !hasAuthOverride) {
-        headers.set("authorization", `Bearer ${auth.apiKey}`);
-      }
-      const props = await discovery.fetchLoadedModelProps(auth.baseUrl ?? model.baseUrl, model.id, headers, signal);
+      const connection = await resolveConnection(ctx, signal);
+      if (!connection || signal.aborted) return;
+      const props = await discovery.fetchLoadedModelProps(connection.baseUrl, model.id, connection.headers, signal);
       if (signal.aborted || ctx.model !== model) return;
       const enhancedModel = reasoning.withReasoningEfforts(model, props);
       if (!enhancedModel) return;

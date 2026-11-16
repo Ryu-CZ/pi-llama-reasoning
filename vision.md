@@ -60,7 +60,7 @@ No provider replacement, global settings writes, model loading, or live server c
 
 Tests cover concurrent allocation by independent child processes, stable ownership, exhaustion, explicit conflicts, busy slots, crash recovery, rollback, and cleanup. A local HTTP fixture with Pi’s real loader/provider/serializer verifies two independent session runtimes forwarding alternating slot IDs 0/1/0/1, explicit request settings, and a changed server slot count. This is not a live two-slot llama.cpp test.
 
-Still required: two independent Pi processes alternating requests against a multi-slot llama.cpp model, with server metrics/logs proving each session reuses its prefix after the other runs. The current live model has one slot; changing its preset or restarting it requires separate approval. Do not describe pinning as a complete cache fix.
+The user subsequently approved configuring the live model for multiple slots with the full shared context available to one active request. The live multi-slot and near-full-pool checks below passed. Pinning remains best-effort, not a complete cache fix.
 
 ### Local inspection and request test
 
@@ -73,7 +73,19 @@ Tested the running router at `http://127.0.0.1:7484` with loaded model `Qwen3.8-
 
 After implementation, a real Pi 1.5.2 session loaded this extension and made two short requests to the same live model. Both outgoing requests carried `id_slot: 0` and `cache_prompt: true`; both returned `OK`. Pi reported 690 uncached input tokens on the first request and 691 cache-read tokens with 19 new input tokens on the follow-up. The `/llama-slots` command reported slot 0 idle, its context/prompt counters, and this session’s lease. The session used a temporary cache directory and released its lease at shutdown.
 
-This verifies live Pi integration, inspectability, and single-session cache reuse—not distinct-slot routing or two-session cache isolation. Only one slot exists, and an unpinned request could also reuse its prefix. No presets, loaded-model set, or server processes were changed; generation tests did change slot/cache state.
+These initial checks verified live Pi integration, inspectability, and single-session cache reuse only. No presets or server processes were changed during those checks; generation tests did change slot/cache state.
+
+### Live multi-slot setup and verification
+
+With explicit user approval, changed only the upstream Unsloth Q4_K_M preset at `/mnt/m2-games/ai/local_model/configs/models-upstream.ini`: `parallel = 2` and `cache-idle-slots = false`. Retained `ctx-size = 122880`, `kv-unified = true`, `cont-batching = true`, `slots = true`, Q8 K/V, and the existing RAM cache budget. Reloaded the preset catalog and this model only; Kev and embeddings stayed loaded. Other model presets and the Turbo backend were untouched.
+
+The first live two-process test failed its cache-reuse assertion with `cache-idle-slots = true`: both processes had stable distinct IDs and ran concurrently, but one follow-up reprocessed all 948 prompt tokens. In this build, starting a task saves and clears other idle slots under unified KV (`server-context.cpp`, `TAG_IDLE_SLOT_CLEAR`), while selecting an explicit empty slot can bypass the RAM prompt-cache restore path. Stable slot selection alone did not solve that interaction. Keep this failed trial in the evidence; do not recommend enabling eager idle-slot clearing for this tested pinning setup.
+
+Disabling eager clearing resolved the observed failure. Two independent Pi 1.5.2 processes, sharing a temporary lease cache and loading this extension, made simultaneous requests on slots 0 and 1. Inspection observed both slots busy. Alternating follow-ups retained IDs 0/1 and each reported 927 cache-read tokens with 19 fresh input tokens. Both sessions shut down without extension errors.
+
+Both slots reported a 122,880-token context limit. The installed source sets `n_ctx_seq = n_ctx` when unified KV is enabled, rather than dividing by the number of sequences. A native `/completion` request on slot 0 evaluated 122,500 synthetic input tokens plus one output token without truncation, taking about 54.8 seconds. Slot 1 was idle with 947 cached tokens at the start. Logs confirmed it was purged when the shared pool filled, and its prompt counter became zero. This verifies near-full-pool use by one active request and reclamation of idle contents, not 122,880 independent tokens per slot. Two concurrently active contexts must fit in the shared pool together.
+
+The two-process Pi test passed again after the large-context check, with the same 927-token cache reuse for both follow-ups. Runtime evidence is saved locally in `/tmp/pi-live-multislot-evidence.json`, `/tmp/pi-live-multislot-idle-cache-failure.json`, and `/tmp/llama-unified-full-context-evidence.json`. Total GPU usage after the large-context test was about 23,651 MiB with 505 MiB free; this is the observed whole-GPU state, not an isolated KV allocation measurement.
 
 ## Information flow
 
@@ -235,7 +247,7 @@ Project setup follows `pi-minimal-footer`: TypeScript under `extensions/`, Node 
 ## Verification
 
 - Pi 1.5.2; Node.js 22.19.0 and 26.10.0.
-- Slot implementation: all 54 tests passed on both Node versions; `npm run check`, `npm pack --dry-run`, and `git diff --check` passed. Live single-slot generation and inspection verified as described above; multi-slot live isolation remains unverified.
+- Slot implementation: all 54 tests passed on both Node versions; `npm run check`, `npm pack --dry-run`, and `git diff --check` passed. Live single-slot inspection, independent-process multi-slot prefix reuse, and near-full unified-pool use verified as described above. This does not establish strict isolation from other clients or eviction.
 - Node tests, including real Pi integration against a local HTTP fixture: default and custom effort budgets, off mode, output-limit clamping, and explicit budget overrides.
 - Packed extension loaded through Pi’s loader.
 - Read-only discovery against a running llama.cpp router with Qwen3.8-27B reported `low`, `medium`, and `xhigh`.

@@ -38,7 +38,8 @@ Slot pinning enables automatically when the loaded model exposes its slots. Each
 
 Run `/llama-slots` to see busy/idle slots, prompt/cache counters, and local session assignments. The footer shows this session’s assigned slot or why it is unpinned.
 
-- The server must expose slots (`--slots`); multiple sessions need multiple slots (`--parallel`). This extension does not change server settings.
+- The server must expose slots (`--slots`); multiple sessions need multiple slots (`--parallel`). Use `--kv-unified` to share the context pool instead of splitting it into fixed slot partitions. This extension does not change server settings.
+- On tested llama.cpp build `b12277-7c2653acc`, use `--no-cache-idle-slots` with pinning: eager idle-slot clearing otherwise caused one session to lose its reusable prefix. Idle caches can still be reclaimed under memory pressure.
 - Coordination covers extension instances sharing the same user cache on one machine, router URL, and model ID—not other clients or machines.
 - If inspection or coordination fails, or all slots are busy or leased, requests continue unchanged with a warning. **This is best-effort cache affinity, not strict isolation:** unpinned or external clients can still displace cached prefixes.
 - Explicit slot and cache settings are preserved. Pinning cannot prevent cache eviction under memory pressure or model reloads.

@@ -87,6 +87,12 @@ Both slots reported a 122,880-token context limit. The installed source sets `n_
 
 The two-process Pi test passed again after the large-context check, with the same 927-token cache reuse for both follow-ups. Runtime evidence is saved locally in `/tmp/pi-live-multislot-evidence.json`, `/tmp/pi-live-multislot-idle-cache-failure.json`, and `/tmp/llama-unified-full-context-evidence.json`. Total GPU usage after the large-context test was about 23,651 MiB with 505 MiB free; this is the observed whole-GPU state, not an isolated KV allocation measurement.
 
+### Current live capacity: three slots
+
+The user subsequently requested three local slots for two subagents plus a possible background memory task; the paid main agent runs remotely and does not consume one. Raised only this model’s `parallel` setting from 2 to 3 and reloaded it, preserving the 122,880-token unified pool and disabled eager idle-slot clearing. All three slots report the full context limit; simultaneously active contexts share the total pool.
+
+A live check with three independent Pi processes observed slots 0/1/2 busy together. All three follow-ups retained their slot and each reused 927 cache-read tokens with 19 fresh tokens. All processes shut down without extension errors. CPU embeddings and Kev remained loaded. Evidence: `/tmp/pi-live-three-slots-evidence.json`. The earlier 122,500-token generation check used two configured slots; with three, full per-slot limits and shared-KV configuration were rechecked, not another near-full-pool generation.
+
 ## Information flow
 
 Pi owns the provider, authentication, model management, thinking selector, and request serializer. The extension discovers native efforts and replaces only the active session model with an enhanced copy.

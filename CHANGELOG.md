@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-16
+
 ### Added
 
 - Automatically pin Pi sessions to separate llama.cpp slots when available, preserving explicit slot and cache settings.
@@ -48,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Correct refresh guidance: restart Pi after template capabilities change; `/reload` retains the active model’s efforts.
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.1.0...v0.1.1

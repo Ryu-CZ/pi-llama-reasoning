@@ -130,6 +130,8 @@ test("shutdown aborts discovery without applying a model or reporting an error",
 
 test("the discovery timeout cancels the request and warns once per model", async (t) => {
   const timeouts = [];
+  const abortedAtStart = [];
+  let observedAborts = 0;
   let timeoutController;
   t.mock.method(AbortSignal, "timeout", (duration) => {
     timeouts.push(duration);
@@ -137,14 +139,21 @@ test("the discovery timeout cancels the request and warns once per model", async
     return timeoutController.signal;
   });
   t.mock.method(globalThis, "fetch", async (_url, init) => {
-    assert.equal(init.signal.aborted, false);
+    abortedAtStart.push(init.signal?.aborted);
+    if (init.signal?.aborted) throw init.signal.reason;
     queueMicrotask(() => timeoutController.abort(new DOMException("Discovery timed out", "TimeoutError")));
-    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true }));
+    return new Promise((_resolve, reject) => init.signal.addEventListener("abort", () => {
+      observedAborts++;
+      reject(init.signal.reason);
+    }, { once: true }));
   });
   const f = fixture();
   const original = f.ctx.model;
   await f.emit("session_start");
   await f.emit("before_agent_start");
+  // Discovery catches request failures, so mock assertions could otherwise be swallowed.
+  assert.deepEqual(abortedAtStart, [false, false]);
+  assert.equal(observedAborts, 2);
   assert.deepEqual(timeouts, [3000, 3000]);
   assert.equal(f.ctx.model, original);
   assert.equal(f.replacements.length, 0);

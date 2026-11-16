@@ -136,17 +136,23 @@ test("exhaustion and explicit conflicts warn without replacing the request", asy
   assert.match(f.notifications.at(-1)[0], /explicit slot unavailable/);
 });
 
-test("discovery and coordination errors fail open with a sanitized warning", async (t) => {
+test("discovery errors fail open with a sanitized warning", async (t) => {
   router(t, { failSlots: true });
   const f = fixture();
   assert.equal(await f.emit("before_provider_request", payload()), undefined);
-  assert.match(f.notifications[0][0], /failed; request unchanged/);
-  assert.doesNotMatch(f.notifications[0][0], /secret/);
-  t.mock.restoreAll();
+  assert.deepEqual(f.notifications, [[
+    "llama slots: discovery or coordination failed; request unchanged", "warning",
+  ]]);
+});
+
+test("coordination errors fail open with a sanitized warning", async (t) => {
   router(t);
+  const f = fixture();
   f.leases.acquire = () => { throw new Error("secret database path"); };
   assert.equal(await f.emit("before_provider_request", payload()), undefined);
-  assert.doesNotMatch(f.notifications.at(-1)[0], /secret/);
+  assert.deepEqual(f.notifications, [[
+    "llama slots: discovery or coordination failed; request unchanged", "warning",
+  ]]);
 });
 
 test("model changes and shutdown discard in-flight results and release leases", async (t) => {

@@ -263,13 +263,34 @@ test("shutdown still closes coordination after a release failure", async () => {
   assert.doesNotMatch(f.notifications[0][0], /secret/);
 });
 
+test("inspection renders a single slot with another session's lease", async (t) => {
+  router(t, { props: { total_slots: 1, endpoint_slots: true }, slots: [{ id: 0, is_processing: false }] });
+  const f = fixture();
+  f.leases.list = () => [{ slotId: 0, sessionId: "session-b", pid: process.pid }];
+  await f.inspect();
+  assert.deepEqual(f.notifications, [[[
+    "qwen",
+    "└─ Slot 0: idle",
+    "   ├─ context ?; prompt ?; processed ?; cached ?",
+    `   └─ lease: session-b (PID ${process.pid})`,
+    "Snapshot only. Counters are not total KV memory usage; local leases do not identify external clients.",
+  ].join("\n"), "info"]]);
+});
+
 test("inspection reports fresh server state and local leases without acquiring", async (t) => {
   router(t);
   const f = fixture();
   await f.inspect();
   assert.equal(f.claims.length, 0);
   assert.equal(f.leases.released, 0);
-  assert.match(f.notifications[0][0], /Slot 0: idle; context 8192; prompt 23; processed 0; cached 0; this session/);
-  assert.match(f.notifications[0][0], /Slot 1: busy; context \?/);
-  assert.match(f.notifications[0][0], /not total KV memory/);
+  assert.deepEqual(f.notifications, [[[
+    "qwen",
+    "├─ Slot 0: idle",
+    "│  ├─ context 8192; prompt 23; processed 0; cached 0",
+    `│  └─ lease: this session (PID ${process.pid})`,
+    "└─ Slot 1: busy",
+    "   ├─ context ?; prompt ?; processed ?; cached ?",
+    "   └─ lease: no local lease",
+    "Snapshot only. Counters are not total KV memory usage; local leases do not identify external clients.",
+  ].join("\n"), "info"]]);
 });

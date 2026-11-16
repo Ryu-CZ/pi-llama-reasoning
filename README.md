@@ -37,7 +37,7 @@ Each level uses Pi’s thinking token budget. Your custom reasoning, budget, and
 
 A server slot lets a session reuse its cached conversation between turns. The extension assigns separate slots automatically when available; no extra Pi setup is needed.
 
-Run `/llama-slots` to see which slots are busy and which sessions are assigned to them. The footer shows your session’s slot or why it has no assignment.
+Run `/llama-slots` to see a tree of the selected model’s slots, their busy/idle state, counters, and session assignments. The footer shows your session’s slot or why it has no assignment.
 
 Other extensions can turn automatic slot management off or back on while Pi is idle. This lets another extension manage slots without disabling reasoning support or manual inspection. See the [integration contract](vision.md#slot-management-control) for the event and example.
 

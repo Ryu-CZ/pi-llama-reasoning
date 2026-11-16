@@ -159,10 +159,16 @@ export function registerSlotPinning(pi: ExtensionAPI, leases = new SlotLeases())
           return;
         }
         const owners = leases.list(inspected.scope);
-        const lines = inspected.slots.map((slot) => {
+        const lines = inspected.slots.map((slot, index) => {
           const owner = owners.find((entry) => entry.slotId === slot.id);
           const lease = owner ? `${owner.sessionId === ctx.sessionManager.getSessionId() && owner.pid === process.pid ? "this session" : owner.sessionId} (PID ${owner.pid})` : "no local lease";
-          return `Slot ${slot.id}: ${slot.busy ? "busy" : "idle"}; context ${slot.context ?? "?"}; prompt ${slot.prompt ?? "?"}; processed ${slot.processed ?? "?"}; cached ${slot.cached ?? "?"}; ${lease}`;
+          const last = index === inspected.slots.length - 1;
+          const indent = last ? "   " : "│  ";
+          return [
+            `${last ? "└─" : "├─"} Slot ${slot.id}: ${slot.busy ? "busy" : "idle"}`,
+            `${indent}├─ context ${slot.context ?? "?"}; prompt ${slot.prompt ?? "?"}; processed ${slot.processed ?? "?"}; cached ${slot.cached ?? "?"}`,
+            `${indent}└─ lease: ${lease}`,
+          ].join("\n");
         });
         ctx.ui.notify(`${ctx.model?.id}\n${lines.join("\n")}\nSnapshot only. Counters are not total KV memory usage; local leases do not identify external clients.`, "info");
       } catch {

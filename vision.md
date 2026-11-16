@@ -71,7 +71,7 @@ This coordinates participating extension instances, not arbitrary clients. Other
 
 ### Make slot usage inspectable
 
-`/llama-slots` exposes a read-only view of the selected model’s server slots alongside the extension’s session assignments. Show slot ID, busy/idle state, context limit, reported prompt/cache counters, and which slots are leased by participating Pi sessions. Keep server observations separate from local lease ownership: llama.cpp’s slot response does not identify the owning Pi session. Label unavailable or stale observations rather than implying a reservation or reporting zero usage.
+`/llama-slots` exposes a read-only tree rooted at the selected model, with each server slot as a child and its counters and local lease as separate leaves. Single-slot and final branches end with `└─`; earlier branches retain `│` indentation. Only formatting changes: discovery and lease operations remain the same. Show slot ID, busy/idle state, context limit, reported prompt/cache counters, and which slots are leased by participating Pi sessions. Keep server observations separate from local lease ownership: llama.cpp’s slot response does not identify the owning Pi session. Label unavailable or stale observations rather than implying a reservation or reporting zero usage.
 
 Use the model-specific router endpoint `GET /slots?model=…`; `/props?model=…` reports `total_slots` and whether the slots endpoint is enabled. Do not enable endpoints, change server settings, or load models just to inspect them. The footer shows the assigned slot or fallback state. Inspection neither allocates nor releases leases.
 

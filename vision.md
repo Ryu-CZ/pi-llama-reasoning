@@ -37,11 +37,28 @@ Add opt-in slot pinning to this extension while retaining Pi’s built-in provid
 
 This coordinates participating extension instances, not arbitrary clients. Other clients can still target the same slots. Pinning also cannot prevent eviction under shared KV memory pressure, model reloads, or cache changes caused by differences in the serialized prompt. It is not a reservation of context capacity or a replacement for server cache configuration.
 
+### Make slot usage inspectable
+
+Expose a read-only view of the selected model’s server slots alongside the extension’s session assignments. Show slot ID, busy/idle state, context limit, reported prompt/cache counters, and which slots are leased by participating Pi sessions. Keep server observations separate from local lease ownership: llama.cpp’s slot response does not identify the owning Pi session. Label unavailable or stale observations rather than implying a reservation or reporting zero usage.
+
+Use the model-specific router endpoint `GET /slots?model=…`; `/props?model=…` reports `total_slots` and whether the slots endpoint is enabled. Do not enable endpoints, change server settings, or load models just to inspect them. The exact Pi command/UI remains to be decided.
+
 ### Evidence required before shipping
 
 Verify `id_slot`, `cache_prompt`, slot discovery, and model-specific routing against the supported llama.cpp server build. Test two independent Pi processes alternating requests to one model: distinct slot assignments must remain stable, and server metrics/logs must show reuse of each session’s unchanged prefix after the other session runs. Also test simultaneous allocation, explicit assignments, exhausted slots, crashes, and server/model restarts. Do not describe pinning as a complete cache fix without that evidence.
 
 This is planned work, not current behavior. No provider replacement, global settings writes, model loading, or live server changes are needed.
+
+### Local inspection and request test
+
+Tested the running router at `http://127.0.0.1:7484` with loaded model `Qwen3.8-27B-Q4_K_M`, backed by `Qwen3.8-27B-UD-Q4_K_M.gguf`, on llama.cpp `b12277-7c2653acc`:
+
+- `/props?model=…` reported `total_slots: 1`, `endpoint_slots: true`, and metrics disabled. The running model uses `--parallel 1`, `--kv-unified`, `--cont-batching`, and `--cache-idle-slots`.
+- `/slots?model=…` exposed slot ID, busy state, task ID, context limit, and prompt processing/cache counters without server changes.
+- A 64-output-token chat request through the router accepted `id_slot: 0` and `cache_prompt: true`. Inspection observed slot 0 change from idle to busy and back to idle. The response reported 28 prompt tokens and zero cached tokens.
+- Idle snapshots reported zero processed/cache counters even though a prompt token count remained. These counters must not be presented as total resident KV usage or total RAM prompt-cache occupancy.
+
+This verifies inspectability and acceptance of the request fields, not distinct-slot routing or cache isolation: only one slot exists, and an unpinned request would also use slot 0. Multi-slot assignment, cache reuse, and extension integration remain unverified. No presets, loaded-model set, or server processes were changed; the generation test did change slot/cache state.
 
 ## Information flow
 

@@ -17,6 +17,32 @@ Only add functionality missing from built-in Pi. Other integration gaps need evi
 
 No changes to authentication, model loading, downloads, classifiers, or other providers.
 
+## Planned scope: session slot pinning
+
+### Problem
+
+Two Pi sessions using the same llama.cpp model can displace each other’s cached conversation prefixes. Pi does not currently assign a stable llama.cpp slot to each session; it leaves slot selection to the server. Automatic prefix matching can work, but it does not guarantee separate slots for separate sessions. Repeated prompt evaluation makes alternating agents slow, especially with long contexts.
+
+Multiple slots, parallel requests, continuous batching, and unified KV cache do not establish session-to-slot affinity. Idle-slot caching helps retain prefixes but is a separate mechanism.
+
+### Proposed solution
+
+Add opt-in slot pinning to this extension while retaining Pi’s built-in provider and generation transport:
+
+- Discover the actual slot count for the selected, loaded model without loading or waking models.
+- Assign each participating Pi session a stable slot, coordinated across Pi processes for the same server and model. Hashing session IDs modulo slot count is not sufficient: two sessions can collide.
+- Use `before_provider_request` to add `id_slot` and enable `cache_prompt` when not explicitly configured. Preserve explicit request values; account for explicit slot assignments when allocating automatic ones.
+- Keep the assignment across turns. Release it when no longer needed and recover abandoned assignments after crashes. Revalidate after server/model changes.
+- If discovery fails or no slot is available, report that pinning is unavailable. Never silently claim isolation or assign a slot already leased to another participating session. Define whether to wait, reject, or explicitly allow unpinned requests before implementation.
+
+This coordinates participating extension instances, not arbitrary clients. Other clients can still target the same slots. Pinning also cannot prevent eviction under shared KV memory pressure, model reloads, or cache changes caused by differences in the serialized prompt. It is not a reservation of context capacity or a replacement for server cache configuration.
+
+### Evidence required before shipping
+
+Verify `id_slot`, `cache_prompt`, slot discovery, and model-specific routing against the supported llama.cpp server build. Test two independent Pi processes alternating requests to one model: distinct slot assignments must remain stable, and server metrics/logs must show reuse of each session’s unchanged prefix after the other session runs. Also test simultaneous allocation, explicit assignments, exhausted slots, crashes, and server/model restarts. Do not describe pinning as a complete cache fix without that evidence.
+
+This is planned work, not current behavior. No provider replacement, global settings writes, model loading, or live server changes are needed.
+
 ## Information flow
 
 Pi owns the provider, authentication, model management, thinking selector, and request serializer. The extension discovers native efforts and replaces only the active session model with an enhanced copy.

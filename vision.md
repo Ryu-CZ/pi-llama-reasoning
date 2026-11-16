@@ -95,6 +95,8 @@ A live check with three independent Pi processes observed slots 0/1/2 busy toget
 
 ## Information flow
 
+Rendered overview: [reasoning-flow.png](media/reasoning-flow.png).
+
 Pi owns the provider, authentication, model management, thinking selector, and request serializer. The extension discovers native efforts and replaces only the active session model with an enhanced copy.
 
 ```mermaid
@@ -284,6 +286,9 @@ The integration test keeps one real Pi session and local HTTP fixture, with name
 The dead-code/test audit found no unused source exports or obsolete tests. Retained unit and integration overlap covers different boundaries: isolated decisions versus the actual Pi loader/provider/serializer. Strict TypeScript unused checks pass. Node coverage executes every source line (80.12% branch coverage); that supports reachability, not exhaustive branch coverage. All 28 reported tests pass; the increase from 22 comes from naming existing integration scenarios, not new feature coverage. These internal changes do not need a user-facing changelog entry.
 
 ## README review corrections
+
+- Keep exact thinking-budget values, serializer behavior, cache internals, and build-specific investigation here rather than in the README. The README retains actionable server flags, setup steps, and practical limits; the budget mapping and idle-cache failure evidence are documented above.
+- Release 0.1.3 contained discovery-timeout code-quality changes without behavior changes. Its changelog now states only that there were no user-facing changes; the implementation notes belong here.
 
 - Verified the usage command against pinned Pi 1.5.2: `handleThinkingCommand()` calls `showThinkingSelector()` when `/thinking` has no argument. README names the existing built-in command; no extension command or runtime behavior changed.
 - Documented the all-or-nothing label check in `withReasoningEfforts()`: require `supports_reasoning_effort: true` and a nonempty list containing only Pi-supported effort labels. A mixed list such as `["low", "custom"]` rejects the enhancement, not just the custom entry. Existing malformed-report tests cover this fallback.

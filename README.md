@@ -39,6 +39,8 @@ A server slot lets a session reuse its cached conversation between turns. The ex
 
 Run `/llama-slots` to see which slots are busy and which sessions are assigned to them. The footer shows your session’s slot or why it has no assignment.
 
+Other extensions can turn automatic slot management off or back on while Pi is idle. This lets another extension manage slots without disabling reasoning support or manual inspection. See the [integration contract](vision.md#slot-management-control) for the event and example.
+
 The server needs slot inspection enabled and enough slots for your sessions. For example, our tested three-slot setup uses:
 
 ```text

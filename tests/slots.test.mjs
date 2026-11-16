@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createEventBus } from "@earendil-works/pi-coding-agent";
 import { registerSlotPinning } from "../extensions/lib/slots.ts";
 import { model } from "./helpers/model.mjs";
 
 function fixture() {
+  const events = createEventBus();
   const handlers = new Map();
   const commands = new Map();
   const notifications = [];
@@ -18,13 +20,19 @@ function fixture() {
   };
   const ctx = {
     model: model(),
+    isIdle: () => true,
     sessionManager: { getSessionId: () => "session-a" },
     modelRegistry: { getApiKeyAndHeaders: async () => ({ ok: true, apiKey: "secret" }) },
     ui: { notify: (...args) => notifications.push(args), setStatus: (...args) => statuses.push(args) },
   };
-  registerSlotPinning({ on: (event, handler) => handlers.set(event, handler),
+  registerSlotPinning({ events, on: (event, handler) => handlers.set(event, handler),
     registerCommand: (name, command) => commands.set(name, command) }, leases);
-  return { ctx, leases, claims, notifications, statuses,
+  return { ctx, leases, claims, notifications, statuses, events,
+    setEnabled: (enabled) => {
+      let result;
+      events.emit("pi-llama-reasoning:set-slot-management", { enabled, reply: (value) => { result = value; } });
+      return result;
+    },
     emit: (event, payload) => handlers.get(event)({ payload }, ctx),
     inspect: () => commands.get("llama-slots").handler("", ctx) };
 }
@@ -45,6 +53,65 @@ function router(t, options = {}) {
 }
 
 const payload = () => ({ model: "qwen", messages: [{ role: "user", content: "hello" }], temperature: 0.3 });
+
+test("slot management can be disabled before startup and re-enabled while idle", async (t) => {
+  const calls = router(t);
+  const f = fixture();
+  assert.deepEqual(f.setEnabled(false), { ok: true, enabled: false });
+  await f.emit("session_start");
+  const request = { ...payload(), id_slot: 1 };
+  assert.equal(await f.emit("before_provider_request", request), undefined);
+  assert.equal(request.cache_prompt, undefined);
+  assert.equal(calls.length, 0);
+  assert.equal(f.claims.length, 0);
+  await f.inspect();
+  assert.match(f.notifications[0][0], /Slot 0: idle/);
+  assert.deepEqual(f.setEnabled(true), { ok: true, enabled: true });
+  assert.equal((await f.emit("before_provider_request", payload())).id_slot, 0);
+  const released = f.leases.released;
+  assert.deepEqual(f.setEnabled(false), { ok: true, enabled: false });
+  assert.equal(f.leases.released, released + 1);
+  assert.deepEqual(f.statuses.at(-1), ["llama-slots", undefined]);
+  assert.deepEqual(f.setEnabled(false), { ok: true, enabled: false });
+  assert.equal(f.leases.released, released + 1);
+});
+
+test("slot management rejects busy changes, invalid input and failed lease cleanup", async (t) => {
+  router(t);
+  const f = fixture();
+  await f.emit("session_start");
+  await f.emit("before_provider_request", payload());
+  f.ctx.isIdle = () => false;
+  assert.deepEqual(f.setEnabled(false), { ok: false, enabled: true, reason: "busy" });
+  assert.equal(f.leases.released, 0);
+  assert.deepEqual(f.setEnabled(true), { ok: true, enabled: true });
+  f.ctx.isIdle = () => true;
+  for (const value of [undefined, null, "false", 0]) {
+    assert.deepEqual(f.setEnabled(value), { ok: false, enabled: true, reason: "invalid-request" });
+  }
+  f.leases.release = () => { throw new Error("secret database path"); };
+  assert.deepEqual(f.setEnabled(false), { ok: false, enabled: true, reason: "cleanup-failed" });
+  assert.equal((await f.emit("before_provider_request", payload())).id_slot, 0);
+});
+
+test("slot management rejects handoff during discovery and unsubscribes on shutdown", async (t) => {
+  let ready;
+  const started = new Promise((resolve) => { ready = resolve; });
+  let finish;
+  const waiting = new Promise((resolve) => { finish = resolve; });
+  t.mock.method(globalThis, "fetch", async () => { ready(); await waiting; return Response.json({}); });
+  const f = fixture();
+  await f.emit("session_start");
+  const pending = f.emit("before_provider_request", payload());
+  await started;
+  assert.deepEqual(f.setEnabled(false), { ok: false, enabled: true, reason: "busy" });
+  finish();
+  await pending;
+  assert.deepEqual(f.setEnabled(false), { ok: true, enabled: false });
+  await f.emit("session_shutdown");
+  assert.equal(f.setEnabled(true), undefined);
+  assert.deepEqual(fixture().setEnabled(true), { ok: true, enabled: true });
+});
 
 test("automatically pins a supported model without changing other payload fields", async (t) => {
   const calls = router(t);

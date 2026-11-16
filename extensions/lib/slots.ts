@@ -25,6 +25,33 @@ export function registerSlotPinning(pi: ExtensionAPI, leases = new SlotLeases())
   let activeModel: string | undefined;
   let pending: AbortController | undefined;
   let lastWarning: string | undefined;
+  let enabled = true;
+  let currentCtx: ExtensionContext | undefined;
+
+  pi.on("session_start", (_event, ctx) => { currentCtx = ctx; });
+
+  const unsubscribeControl = pi.events.on("pi-llama-reasoning:set-slot-management", (data) => {
+    if (!isRecord(data)) return;
+    const reply = (ok: boolean, reason?: string) => {
+      if (typeof data.reply === "function") data.reply({ ok, enabled, ...(reason ? { reason } : {}) });
+      else if (!ok) currentCtx?.ui.notify(`llama slot management unchanged: ${reason}`, "warning");
+    };
+    if (typeof data.enabled !== "boolean") return reply(false, "invalid-request");
+    if (data.enabled === enabled) return reply(true);
+    // Do not relinquish a slot between payload preparation and the request reaching the server.
+    if (pending || (currentCtx && !currentCtx.isIdle())) return reply(false, "busy");
+    if (!data.enabled) {
+      try {
+        leases.release();
+      } catch {
+        return reply(false, "cleanup-failed");
+      }
+    }
+    enabled = data.enabled;
+    lastWarning = undefined;
+    currentCtx?.ui.setStatus("llama-slots", undefined);
+    reply(true);
+  });
 
   function status(ctx: ExtensionContext, message: string, warning = false) {
     ctx.ui.setStatus("llama-slots", message);
@@ -51,6 +78,7 @@ export function registerSlotPinning(pi: ExtensionAPI, leases = new SlotLeases())
     activeModel = key;
   });
   pi.on("session_shutdown", (_event, ctx) => {
+    unsubscribeControl();
     release(ctx);
     try {
       leases.close();
@@ -70,7 +98,7 @@ export function registerSlotPinning(pi: ExtensionAPI, leases = new SlotLeases())
   }
 
   pi.on("before_provider_request", async (event, ctx) => {
-    if (!isLlamaChat(ctx) || !isRecord(event.payload) || event.payload.model !== ctx.model?.id ||
+    if (!enabled || !isLlamaChat(ctx) || !isRecord(event.payload) || event.payload.model !== ctx.model?.id ||
         !Array.isArray(event.payload.messages)) return;
     activeModel = modelKey(ctx);
     const currentEpoch = epoch;

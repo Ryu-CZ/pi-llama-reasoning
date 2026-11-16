@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createEventBus } from "@earendil-works/pi-coding-agent";
 import extension from "../extensions/index.ts";
 import { getSupportedThinkingLevels } from "@earendil-works/pi-ai/compat";
 import { model, props } from "./helpers/model.mjs";
@@ -15,6 +16,7 @@ function fixture(original = model()) {
     modelRegistry: { getApiKeyAndHeaders: async () => ({ ok: true, apiKey: "test", headers: { "X-Test": "yes", removed: null } }) },
   };
   const pi = {
+    events: createEventBus(),
     on: (event, handler) => handlers.set(event, [...(handlers.get(event) ?? []), handler]),
     registerCommand() {},
     getThinkingLevel: () => level,
@@ -28,7 +30,7 @@ function fixture(original = model()) {
   };
   extension(pi);
   return {
-    ctx, notifications, replacements,
+    ctx, notifications, replacements, events: pi.events,
     get level() { return level; },
     emit: async (name) => { for (const handler of handlers.get(name) ?? []) await handler({}, ctx); },
   };
@@ -62,6 +64,19 @@ test("enhances the active model once, retaining its selected level and auth head
   assert.equal(calls.length, 2);
   assert.equal(f.replacements.length, 1);
   assert.deepEqual(f.notifications, []);
+});
+
+test("disabling slot management leaves reasoning discovery enabled", async (t) => {
+  mockRouter(t);
+  const f = fixture();
+  let result;
+  f.events.emit("pi-llama-reasoning:set-slot-management", {
+    enabled: false, reply: (value) => { result = value; },
+  });
+  assert.deepEqual(result, { ok: true, enabled: false });
+  await f.emit("session_start");
+  assert.deepEqual(getSupportedThinkingLevels(f.ctx.model), ["off", "low", "medium", "xhigh"]);
+  assert.equal(f.replacements.length, 1);
 });
 
 test("respects explicit authorization header overrides, including removal", async (t) => {

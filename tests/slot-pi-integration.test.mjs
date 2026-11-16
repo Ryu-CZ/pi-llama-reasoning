@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -52,14 +52,39 @@ test("real Pi sessions forward distinct stable slot IDs through the built-in pro
   await once(server, "listening");
   const root = `http://127.0.0.1:${server.address().port}`;
 
-  async function start() {
+  const controlBuses = new WeakMap();
+  const inRequestControlResults = [];
+  const controllerPath = join(dir, "slot-controller.ts");
+  await writeFile(controllerPath, `
+    export default function (pi) {
+      pi.on("session_start", () => {
+        let result;
+        pi.events.emit("pi-llama-reasoning:set-slot-management", {
+          enabled: false, reply: (value) => { result = value; },
+        });
+        if (!result?.ok || result.enabled) throw new Error("Slot handoff failed");
+      });
+      pi.on("before_provider_request", () => {
+        pi.events.emit("pi-llama-reasoning:set-slot-management", {
+          enabled: false,
+          reply: (result) => pi.events.emit("test:slot-control-result", result),
+        });
+      });
+    }
+  `);
+
+  async function start(controlFirst = false) {
     const credentials = new InMemoryCredentialStore();
     await credentials.modify("llama.cpp", async () => ({ type: "api_key", key: "test-key", env: { LLAMA_BASE_URL: root } }));
     const runtime = await ModelRuntime.create({ credentials, modelsPath: null,
       modelsStorePath: join(dir, "models.json"), refreshOnCreate: false });
     runtime.registerNativeProvider(createLlamaProvider().provider);
     assert.equal((await runtime.refresh({ providers: ["llama.cpp"], allowNetwork: true })).errors.size, 0);
-    const loaded = await loadExtensions([join(process.cwd(), "extensions/index.ts")], dir, createEventBus());
+    const events = createEventBus();
+    events.on("test:slot-control-result", (result) => { inRequestControlResults.push(result); });
+    const paths = [join(process.cwd(), "extensions/index.ts")];
+    if (controlFirst) paths.unshift(controllerPath);
+    const loaded = await loadExtensions(paths, dir, events);
     assert.deepEqual(loaded.errors, []);
     const resourceLoader = {
       getExtensions: () => loaded, getSkills: () => ({ skills: [], diagnostics: [] }),
@@ -73,6 +98,7 @@ test("real Pi sessions forward distinct stable slot IDs through the built-in pro
       settingsManager: SettingsManager.inMemory({ compaction: { enabled: false }, retry: { enabled: false } }) });
     await session.bindExtensions({ onError: (error) => errors.push(error) });
     sessions.push(session);
+    controlBuses.set(session, events);
     return session;
   }
 
@@ -98,5 +124,25 @@ test("real Pi sessions forward distinct stable slot IDs through the built-in pro
   await a.prompt("Explicit settings");
   assert.equal(requests.at(-1).id_slot, 0);
   assert.equal(requests.at(-1).cache_prompt, false);
+
+  // A controller loaded first can hand off at startup, independently of our session_start order.
+  await a.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
+  await b.extensionRunner.emit({ type: "session_shutdown", reason: "quit" });
+  const c = await start(true);
+  await c.prompt("Managed elsewhere");
+  assert.equal(requests.at(-1).id_slot, undefined);
+  assert.equal(requests.at(-1).cache_prompt, undefined);
+  let result;
+  controlBuses.get(c).emit("pi-llama-reasoning:set-slot-management", {
+    enabled: true, reply: (value) => { result = value; },
+  });
+  assert.deepEqual(result, { ok: true, enabled: true });
+  await c.prompt("Automatic management restored");
+  assert.equal(requests.at(-1).id_slot, 0);
+  assert.equal(requests.at(-1).cache_prompt, true);
+  assert.deepEqual(inRequestControlResults, [
+    { ok: true, enabled: false },
+    { ok: false, enabled: true, reason: "busy" },
+  ]);
   assert.deepEqual(errors, []);
 });

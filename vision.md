@@ -18,6 +18,37 @@ Only add functionality missing from built-in Pi. Other integration gaps need evi
 
 No changes to authentication, model loading, downloads, classifiers, or other providers.
 
+## Slot-management control
+
+Other extensions can emit `pi-llama-reasoning:set-slot-management` through `pi.events`, following the same namespaced `set-*` convention as pi-minimal-footer. This controls only automatic slot management in the receiving extension runtime, not the server or other Pi processes.
+
+```typescript
+pi.on("session_start", (_event, ctx) => {
+  let result: { ok: boolean; enabled: boolean; reason?: string } | undefined;
+  pi.events.emit("pi-llama-reasoning:set-slot-management", {
+    enabled: false, // true returns control to this extension
+    reply: (value: { ok: boolean; enabled: boolean; reason?: string }) => { result = value; },
+  });
+  if (!result?.ok) {
+    ctx.ui.notify(`Slot handoff unavailable: ${result?.reason ?? "extension absent or unsupported"}`, "warning");
+    return;
+  }
+  // Start managing slots only after the acknowledgement.
+});
+```
+
+Contract:
+
+- `enabled` must be a boolean. Default is true. Changes are memory-only; emit from `session_start` again after reload, resume, fork, or new session. All extension factories have registered listeners by then, so handler load order does not matter. Do not emit from a factory before other extensions have loaded.
+- Optional `reply` receives `{ ok, enabled, reason? }` synchronously. `enabled` reports the resulting state. `pi.events.emit()` itself returns nothing; do not await it as an RPC. No reply means the listener is absent or unsupported. Use the callback for a reliable handoff; a bare `{ enabled: false }` is also accepted.
+- Changing state while Pi is busy or slot discovery is pending returns `ok: false, reason: "busy"`. No deferred changes are queued. Retry when idle. Repeating the current state is an acknowledged no-op, including while busy.
+- Invalid object payloads return `invalid-request`; non-object payloads are ignored. A failed lease release returns `cleanup-failed`, keeps management enabled, and exposes no database details. Without a callback, rejected object requests warn when a session context is available.
+- Turning off first releases this instance's lease and clears its slot footer. Subsequent requests skip slot discovery, allocation, and payload rewriting entirely, including explicit slot/cache fields. Reasoning discovery and manual `/llama-slots` inspection remain available. Turning on allocates on the next eligible request, not at the control event.
+- The listener is removed at shutdown. No settings files, server presets, or other sessions are changed. This is not an ownership arbitration protocol: cooperating extensions must agree on one controller. The last accepted setting wins. Stop the external controller before re-enabling ours.
+- Only the agent request hook is affected. Direct model-registry calls do not automatically participate. This does not reserve a server slot or guarantee cache retention.
+
+Verification uses Pi's real event bus, loader and built-in provider. A controller extension loaded before this extension disables management at startup; requests then omit injected slot/cache fields, and an idle enable restores them. A handoff attempted inside the real request hook is rejected as busy. Unit tests cover disabled discovery, independent reasoning/inspection, lease release, idempotence, busy/pending rejection, invalid input, failed cleanup, and shutdown unsubscription. All 59 tests pass on Node 22.19.0 and 26.10.0 with pinned Pi 1.5.2; typecheck, package dry-run, and diff checks pass. No live-server handoff was tested.
+
 ## Session slot pinning
 
 ### Problem

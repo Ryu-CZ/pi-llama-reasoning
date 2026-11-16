@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Let other extensions turn automatic slot management off or on while Pi is idle, without disabling reasoning support.
+
 ## [0.2.0] - 2026-11-16
 
 ### Added

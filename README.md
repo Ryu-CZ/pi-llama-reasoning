@@ -39,6 +39,19 @@ A server slot lets a session reuse its cached conversation between turns. The ex
 
 Run `/llama-slots` to see a tree of the selected model’s slots, their busy/idle state, counters, and session assignments. The footer shows your session’s slot or why it has no assignment.
 
+Example output (illustrative values; missing counters appear as `?`):
+
+```text
+qwen
+├─ Slot 0: idle
+│  ├─ context 8192; prompt 23; processed 0; cached 0
+│  └─ lease: this session (PID 24180)
+└─ Slot 1: busy
+   ├─ context ?; prompt ?; processed ?; cached ?
+   └─ lease: no local lease
+Snapshot only. Counters are not total KV memory usage; local leases do not identify external clients.
+```
+
 Other extensions can turn automatic slot management off or back on while Pi is idle. This lets another extension manage slots without disabling reasoning support or manual inspection. See the [integration contract](vision.md#slot-management-control) for the event and example.
 
 The server needs slot inspection enabled and enough slots for your sessions. For example, our tested three-slot setup uses:

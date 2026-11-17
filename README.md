@@ -9,15 +9,11 @@
 
 Extends [Pi](https://pi.dev)’s built-in llama.cpp integration with native reasoning-effort selection and automatic session slot pinning.
 
-![Pi + llama.cpp: a segmented reasoning-effort control with medium selected from example levels low, medium, and xhigh; Agent A and Agent B connect to colour-matched slots on one shared model, with a third slot unassigned. Inspect assignments with /llama-slots.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
+![Pi 1.5.2 alone versus Pi with this extension: default thinking choices become model-reported native effort levels; server-selected slots become stable, colour-matched session assignments. Unpinned sessions risk cache invalidation and prompt reprocessing. Pinning supports cache reuse but does not guarantee retention.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
 
 ## Why use it?
 
 Pi 1.5.2’s built-in llama.cpp integration handles connection, model selection, and generation, but does not discover the model’s native reasoning-effort levels or automatically pin sessions to separate server slots. This package adds those two capabilities using information reported by llama.cpp, without replacing Pi’s provider.
-
-For contrast, the built-in integration without this extension:
-
-![Pi 1.5.2 alone: the Qwen3.8-27B example offers off and medium without discovering native effort levels. Both agents leave slot selection to the server, with no automatic session-to-slot affinity. Cache reuse is still possible.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-baseline.png)
 
 **Choose how your model reasons.** Select supported native levels such as `low`, `medium`, and `xhigh` through Pi’s usual thinking selector, with Pi’s thinking token budgets.
 

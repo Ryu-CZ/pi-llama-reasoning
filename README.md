@@ -7,13 +7,15 @@
   <a href="https://pi.dev/packages/pi-llama-reasoning"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
 </p>
 
-Native reasoning controls and automatic session slot pinning for llama.cpp in [Pi](https://pi.dev).
+Extends [Pi](https://pi.dev)’s built-in llama.cpp integration with native reasoning-effort selection and automatic session slot pinning.
 
 ![Pi + llama.cpp: a segmented reasoning-effort control with medium selected from example levels low, medium, and xhigh; Agent A and Agent B connect to colour-matched slots on one shared model, with a third slot unassigned. Inspect assignments with /llama-slots.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
 
 ## Why use it?
 
-**Choose how your model reasons.** Thinking on/off does not expose every level a model supports. Select native levels such as `low`, `medium`, and `xhigh` through Pi’s usual thinking selector, with Pi’s thinking token budgets.
+Pi 1.5.2’s built-in llama.cpp integration handles connection, model selection, and generation, but does not discover the model’s native reasoning-effort levels or automatically pin sessions to separate server slots. This package adds those two capabilities using information reported by llama.cpp, without replacing Pi’s provider.
+
+**Choose how your model reasons.** Select supported native levels such as `low`, `medium`, and `xhigh` through Pi’s usual thinking selector, with Pi’s thinking token budgets.
 
 **Reduce reprocessing between agents.** Sessions sharing one model can displace each other’s cached conversations. Automatic slot pinning keeps participating sessions on separate available slots across turns, helping reuse their conversation prefixes instead of processing them again. Cache retention still depends on server settings and available memory.
 

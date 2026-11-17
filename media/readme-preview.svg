@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800">
   <rect width="1600" height="800" fill="#121B23"/>
   <g font-family="DejaVu Sans, sans-serif" fill="#F2F1ED">
-    <text x="48" y="100" font-size="64" font-weight="bold">Pi + llama.cpp</text>
+    <text x="48" y="100" font-size="64" font-weight="bold">Pi + llama.cpp + this extension</text>
     <rect x="32" y="144" width="736" height="612" rx="24" fill="#202A34"/>
     <rect x="800" y="144" width="768" height="612" rx="24" fill="#202A34"/>
     <g font-size="46" font-weight="bold">

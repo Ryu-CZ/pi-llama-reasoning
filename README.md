@@ -15,6 +15,10 @@ Extends [Pi](https://pi.dev)’s built-in llama.cpp integration with native reas
 
 Pi 1.5.2’s built-in llama.cpp integration handles connection, model selection, and generation, but does not discover the model’s native reasoning-effort levels or automatically pin sessions to separate server slots. This package adds those two capabilities using information reported by llama.cpp, without replacing Pi’s provider.
 
+For contrast, the built-in integration without this extension:
+
+![Pi 1.5.2 alone: the Qwen3.8-27B example offers off and medium without discovering native effort levels. Both agents leave slot selection to the server, with no automatic session-to-slot affinity. Cache reuse is still possible.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-baseline.png)
+
 **Choose how your model reasons.** Select supported native levels such as `low`, `medium`, and `xhigh` through Pi’s usual thinking selector, with Pi’s thinking token budgets.
 
 **Reduce reprocessing between agents.** Sessions sharing one model can displace each other’s cached conversations. Automatic slot pinning keeps participating sessions on separate available slots across turns, helping reuse their conversation prefixes instead of processing them again. Cache retention still depends on server settings and available memory.

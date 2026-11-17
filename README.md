@@ -9,7 +9,7 @@
 
 Native reasoning controls and automatic session slot pinning for llama.cpp in [Pi](https://pi.dev).
 
-![Native reasoning levels in Pi’s thinking selector, plus automatic session-to-slot assignments across turns. Example levels: off, low, medium, xhigh. Slot assignments are illustrative; cache reuse depends on server settings and memory.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
+![Pi + llama.cpp: Native reasoning. Slot pinning.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
 ## Why use it?
 

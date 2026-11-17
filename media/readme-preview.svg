@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="640" viewBox="0 0 1600 640">
+  <rect width="1600" height="640" fill="#111b23"/>
+  <g font-family="DejaVu Sans, sans-serif" fill="#111b23">
+    <text x="64" y="110" font-size="70" font-weight="bold" fill="#f3f1eb">Pi + llama.cpp</text>
+    <rect x="48" y="170" width="736" height="422" rx="24" fill="#8ec7ed"/>
+    <rect x="816" y="170" width="736" height="422" rx="24" fill="#9ddbc0"/>
+    <g font-size="60" font-weight="bold">
+      <text x="88" y="266">Native reasoning</text>
+      <text x="856" y="266">Slot pinning</text>
+    </g>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="34" text-anchor="middle">
+      <g fill="none" stroke="#111b23" stroke-width="2">
+        <rect x="88" y="369" width="120" height="86" rx="12"/>
+        <rect x="224" y="369" width="120" height="86" rx="12"/>
+        <rect x="360" y="369" width="184" height="86" rx="12" fill="#111b23"/>
+        <rect x="560" y="369" width="184" height="86" rx="12"/>
+      </g>
+      <text x="148" y="424">off</text>
+      <text x="284" y="424">low</text>
+      <text x="452" y="424" fill="#8ec7ed">medium</text>
+      <text x="652" y="424">xhigh</text>
+    </g>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="36">
+      <text x="856" y="362">Session A</text>
+      <text x="856" y="446">Session B</text>
+      <text x="856" y="530">Session C</text>
+      <path d="M1080 350 H1220 M1208 342 L1220 350 L1208 358 M1080 434 H1220 M1208 426 L1220 434 L1208 442 M1080 518 H1220 M1208 510 L1220 518 L1208 526" fill="none" stroke="#111b23" stroke-width="3"/>
+      <g fill="none" stroke="#111b23" stroke-width="2">
+        <rect x="1248" y="315" width="264" height="68" rx="12"/>
+        <rect x="1248" y="399" width="264" height="68" rx="12"/>
+        <rect x="1248" y="483" width="264" height="68" rx="12"/>
+      </g>
+      <g text-anchor="middle">
+        <text x="1380" y="362">Slot 0</text>
+        <text x="1380" y="446">Slot 1</text>
+        <text x="1380" y="530">Slot 2</text>
+      </g>
+    </g>
+  </g>
+</svg>

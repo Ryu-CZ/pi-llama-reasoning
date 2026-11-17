@@ -9,7 +9,7 @@
 
 Native reasoning controls and automatic session slot pinning for llama.cpp in [Pi](https://pi.dev).
 
-![Pi + llama.cpp: Native reasoning. Slot pinning.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
+![Pi + llama.cpp: native reasoning levels off, low, medium, and xhigh, with three sessions mapped to separate slots. Levels and assignments are illustrative.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
 
 ## Why use it?
 

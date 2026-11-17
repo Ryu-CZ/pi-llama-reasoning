@@ -1,56 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
-  <defs>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#25343e" stroke-width="1"/>
-    </pattern>
-  </defs>
-  <rect width="1600" height="900" fill="#111b23"/>
-  <rect width="1600" height="900" fill="url(#grid)" opacity="0.55"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="720" viewBox="0 0 1600 720">
+  <rect width="1600" height="720" fill="#111b23"/>
   <g fill="#f3f1eb" font-family="DejaVu Sans, sans-serif">
     <text x="72" y="100" font-family="DejaVu Serif, serif" font-size="56" font-style="italic" font-weight="bold">pi-llama-reasoning</text>
     <text x="72" y="181" font-size="49" font-weight="bold">Native reasoning. Stable session slots.</text>
-    <text x="72" y="234" font-size="27" fill="#b7c5cf">Choose how your model thinks. Reduce reprocessing when agents share it.</text>
 
-    <rect x="72" y="290" width="700" height="430" rx="16" fill="#1c2a35" stroke="#405562" stroke-width="2"/>
-    <text x="108" y="344" font-size="19" fill="#8ec7ed" letter-spacing="3">REASONING CONTROL</text>
-    <text x="108" y="401" font-size="34" font-weight="bold">More than on / off</text>
-    <text x="108" y="445" font-size="23" fill="#b7c5cf">Native levels in Pi’s thinking selector</text>
-    <g font-family="DejaVu Sans Mono, monospace" font-size="27" text-anchor="middle">
-      <rect x="108" y="491" width="126" height="67" rx="9" fill="#263946" stroke="#607583"/>
-      <text x="171" y="535">off</text>
-      <rect x="248" y="491" width="126" height="67" rx="9" fill="#263946" stroke="#8ec7ed"/>
-      <text x="311" y="535" fill="#8ec7ed">low</text>
-      <rect x="388" y="491" width="178" height="67" rx="9" fill="#8ec7ed"/>
-      <text x="477" y="535" fill="#111b23" font-weight="bold">medium</text>
-      <rect x="580" y="491" width="156" height="67" rx="9" fill="#263946" stroke="#8ec7ed"/>
-      <text x="658" y="535" fill="#8ec7ed">xhigh</text>
+    <rect x="72" y="245" width="700" height="403" rx="16" fill="#1c2a35"/>
+    <text x="108" y="319" font-size="36" font-weight="bold">More than on / off</text>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="29" text-anchor="middle">
+      <rect x="108" y="425" width="126" height="80" rx="9" fill="#263946" stroke="#607583"/>
+      <text x="171" y="476">off</text>
+      <rect x="248" y="425" width="126" height="80" rx="9" fill="#263946" stroke="#8ec7ed"/>
+      <text x="311" y="476" fill="#8ec7ed">low</text>
+      <rect x="388" y="425" width="178" height="80" rx="9" fill="#8ec7ed"/>
+      <text x="477" y="476" fill="#111b23" font-weight="bold">medium</text>
+      <rect x="580" y="425" width="156" height="80" rx="9" fill="#263946" stroke="#8ec7ed"/>
+      <text x="658" y="476" fill="#8ec7ed">xhigh</text>
     </g>
-    <text x="108" y="612" font-size="24">With Pi’s thinking token budgets.</text>
-    <text x="108" y="666" font-size="20" fill="#b7c5cf">Example levels: Qwen3.8-27B · Pi 1.5.2</text>
 
-    <rect x="800" y="290" width="728" height="430" rx="16" fill="#1c2a35" stroke="#405562" stroke-width="2"/>
-    <text x="836" y="344" font-size="19" fill="#9ddbc0" letter-spacing="3">SESSION SLOT PINNING</text>
-    <text x="836" y="401" font-size="34" font-weight="bold">Each session keeps its slot</text>
-    <text x="836" y="445" font-size="23" fill="#b7c5cf">Stable assignments across turns</text>
-    <g font-family="DejaVu Sans Mono, monospace" font-size="24">
-      <text x="850" y="505">Session A</text>
-      <text x="850" y="565">Session B</text>
-      <text x="850" y="625">Session C</text>
-      <path d="M1030 496 H1210 M1198 488 L1210 496 L1198 504 M1030 556 H1210 M1198 548 L1210 556 L1198 564 M1030 616 H1210 M1198 608 L1210 616 L1198 624" stroke="#9ddbc0" stroke-width="3" fill="none"/>
+    <rect x="800" y="245" width="728" height="403" rx="16" fill="#1c2a35"/>
+    <text x="836" y="319" font-size="36" font-weight="bold">Each session keeps its slot</text>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="30">
+      <text x="850" y="411">Session A</text>
+      <text x="850" y="486">Session B</text>
+      <text x="850" y="561">Session C</text>
+      <path d="M1045 400 H1210 M1198 392 L1210 400 L1198 408 M1045 475 H1210 M1198 467 L1210 475 L1198 483 M1045 550 H1210 M1198 542 L1210 550 L1198 558" stroke="#9ddbc0" stroke-width="3" fill="none"/>
       <g fill="#263e39" stroke="#9ddbc0">
-        <rect x="1236" y="472" width="248" height="46" rx="8"/>
-        <rect x="1236" y="532" width="248" height="46" rx="8"/>
-        <rect x="1236" y="592" width="248" height="46" rx="8"/>
+        <rect x="1236" y="371" width="248" height="58" rx="8"/>
+        <rect x="1236" y="446" width="248" height="58" rx="8"/>
+        <rect x="1236" y="521" width="248" height="58" rx="8"/>
       </g>
       <g fill="#9ddbc0" text-anchor="middle">
-        <text x="1360" y="504">Slot 0</text>
-        <text x="1360" y="564">Slot 1</text>
-        <text x="1360" y="624">Slot 2</text>
+        <text x="1360" y="411">Slot 0</text>
+        <text x="1360" y="486">Slot 1</text>
+        <text x="1360" y="561">Slot 2</text>
       </g>
     </g>
-    <text x="836" y="681" font-size="20" fill="#b7c5cf">Illustrative assignments · inspect with /llama-slots</text>
-
-    <text x="72" y="782" font-size="25">Same Pi login. Same model picker. Same /llama commands.</text>
-    <text x="72" y="833" font-size="21" fill="#b7c5cf">Pinning needs available server slots. Cache reuse also depends on server settings and memory.</text>
   </g>
 </svg>

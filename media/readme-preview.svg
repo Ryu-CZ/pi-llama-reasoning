@@ -45,63 +45,66 @@
     <text x="72" y="530" font-size="26" fill="#C1C9D0">Default choices, not the model’s full effort range</text>
     <text x="72" y="942" font-size="26" fill="#92C5E9">Discover and select low · medium · xhigh</text>
 
-    <!-- Illustrative sequence: one slot is reused by alternating sessions. -->
-    <text x="840" y="243" font-size="27" font-weight="bold">Without pinning: possible cache displacement</text>
-    <text x="840" y="282" font-size="25" fill="#C1C9D0">Same model. Same slot. Three successive turns.</text>
-    <g fill="#121B23" stroke="#7C8D99" stroke-width="3">
-      <rect x="840" y="308" width="200" height="132" rx="12"/>
-      <rect x="1080" y="308" width="200" height="132" rx="12"/>
-      <rect x="1320" y="308" width="200" height="132" rx="12"/>
+    <!-- Cache blocks represent conversation prefixes, not reserved memory capacity. -->
+    <text x="840" y="243" font-size="30" font-weight="bold">Without pinning: cached work can be lost</text>
+    <text x="840" y="282" font-size="25" fill="#C1C9D0">Example: B reuses A’s slot</text>
+    <rect x="1056" y="304" width="464" height="186" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
+    <text x="1288" y="338" font-size="24" text-anchor="middle" font-weight="bold">One shared model · Slot 0</text>
+    <rect x="840" y="350" width="174" height="46" rx="7" fill="#92C5E9"/>
+    <rect x="840" y="420" width="174" height="46" rx="7" fill="#F1BE58"/>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="25" font-weight="bold" fill="#121B23">
+      <text x="855" y="381">&gt;_ A first</text>
+      <text x="855" y="451">&gt;_ B next</text>
     </g>
-    <g font-size="25" font-weight="bold" text-anchor="middle">
-      <text x="940" y="344" fill="#92C5E9">1 · A runs</text>
-      <text x="1180" y="344" fill="#F1BE58">2 · B runs</text>
-      <text x="1420" y="344" fill="#92C5E9">3 · A returns</text>
+    <path d="M1018 373 H1078" stroke="#92C5E9" stroke-width="5" stroke-dasharray="7 7"/>
+    <path d="M1018 443 H1078 M1066 431 L1078 443 L1066 455" stroke="#F1BE58" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#92C5E9" opacity="0.65">
+      <rect x="1094" y="355" width="40" height="34" rx="4"/>
+      <rect x="1142" y="355" width="40" height="34" rx="4"/>
+      <rect x="1190" y="355" width="40" height="34" rx="4"/>
+      <rect x="1238" y="355" width="40" height="34" rx="4"/>
     </g>
-    <g fill="#92C5E9">
-      <rect x="854" y="365" width="172" height="54" rx="7"/>
-      <rect x="1334" y="365" width="172" height="54" rx="7"/>
+    <path d="M1090 351 L1282 393 M1090 393 L1282 351" stroke="#F2F1ED" stroke-width="5" stroke-linecap="round"/>
+    <text x="1300" y="380" font-size="25" fill="#92C5E9">A’s cache lost</text>
+    <path d="M1186 399 V417 M1176 407 L1186 417 L1196 407" stroke="#F1BE58" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#F1BE58">
+      <rect x="1094" y="426" width="40" height="34" rx="4"/>
+      <rect x="1142" y="426" width="40" height="34" rx="4"/>
+      <rect x="1190" y="426" width="40" height="34" rx="4"/>
+      <rect x="1238" y="426" width="40" height="34" rx="4"/>
     </g>
-    <rect x="1094" y="365" width="172" height="54" rx="7" fill="#F1BE58"/>
-    <g font-family="DejaVu Sans Mono, monospace" font-size="25" font-weight="bold" fill="#121B23" text-anchor="middle">
-      <text x="940" y="401">Slot 0: A</text>
-      <text x="1180" y="401">Slot 0: B</text>
-      <text x="1420" y="401">Slot 0: A</text>
-    </g>
-    <path d="M1048 392 H1070 M1062 384 L1070 392 L1062 400 M1288 392 H1310 M1302 384 L1310 392 L1302 400" fill="none" stroke="#C1C9D0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <g font-size="25" text-anchor="middle">
-      <text x="940" y="478" fill="#C1C9D0">A’s cache stored</text>
-      <text x="1180" y="478" fill="#F1BE58">A’s cache displaced</text>
-      <text x="1420" y="478" fill="#F1BE58" font-weight="bold">A reprocesses</text>
-    </g>
-    <text x="840" y="535" font-size="29" font-weight="bold" fill="#F1BE58">Cache invalidation → prompt reprocessing</text>
+    <text x="1300" y="451" font-size="25" fill="#F1BE58">B replaces it</text>
+    <text x="840" y="535" font-size="30" font-weight="bold" fill="#F1BE58">A returns → rebuild A’s context</text>
 
-    <text x="840" y="655" font-size="30" font-weight="bold">Sessions keep separate slots</text>
-    <rect x="1220" y="694" width="300" height="212" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
-    <text x="1370" y="728" font-size="24" text-anchor="middle" font-weight="bold">One shared model</text>
-    <rect x="1238" y="852" width="264" height="36" rx="7" fill="#202A34" stroke="#7C8D99" stroke-width="2"/>
-    <g fill="none" stroke-width="6" stroke-linecap="round">
-      <path d="M1056 766 H1256" stroke="#92C5E9"/>
-      <path d="M1056 820 H1256" stroke="#F1BE58"/>
+    <text x="840" y="655" font-size="30" font-weight="bold">With pinning: separate cached contexts</text>
+    <text x="840" y="694" font-size="25" fill="#C1C9D0">Same agents. Separate slots across turns.</text>
+    <rect x="1056" y="716" width="464" height="186" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
+    <text x="1288" y="750" font-size="24" text-anchor="middle" font-weight="bold">One shared model</text>
+    <rect x="840" y="766" width="174" height="46" rx="7" fill="#92C5E9"/>
+    <rect x="840" y="832" width="174" height="46" rx="7" fill="#F1BE58"/>
+    <g font-family="DejaVu Sans Mono, monospace" font-size="25" font-weight="bold" fill="#121B23">
+      <text x="855" y="797">&gt;_ Agent A</text>
+      <text x="855" y="863">&gt;_ Agent B</text>
     </g>
+    <path d="M1018 789 H1090" stroke="#92C5E9" stroke-width="5"/>
+    <path d="M1018 855 H1090" stroke="#F1BE58" stroke-width="5"/>
+    <rect x="1080" y="764" width="420" height="50" rx="7" fill="#202A34" stroke="#92C5E9" stroke-width="2"/>
+    <rect x="1080" y="830" width="420" height="50" rx="7" fill="#202A34" stroke="#F1BE58" stroke-width="2"/>
     <g fill="#92C5E9">
-      <rect x="840" y="744" width="216" height="44" rx="7"/>
-      <rect x="1238" y="744" width="264" height="44" rx="7"/>
+      <rect x="1094" y="772" width="40" height="34" rx="4"/>
+      <rect x="1142" y="772" width="40" height="34" rx="4"/>
+      <rect x="1190" y="772" width="40" height="34" rx="4"/>
+      <rect x="1238" y="772" width="40" height="34" rx="4"/>
     </g>
     <g fill="#F1BE58">
-      <rect x="840" y="798" width="216" height="44" rx="7"/>
-      <rect x="1238" y="798" width="264" height="44" rx="7"/>
+      <rect x="1094" y="838" width="40" height="34" rx="4"/>
+      <rect x="1142" y="838" width="40" height="34" rx="4"/>
+      <rect x="1190" y="838" width="40" height="34" rx="4"/>
+      <rect x="1238" y="838" width="40" height="34" rx="4"/>
     </g>
-    <g font-family="DejaVu Sans Mono, monospace" font-size="25" font-weight="bold" fill="#121B23">
-      <text x="856" y="774">&gt;_ Agent A</text>
-      <text x="856" y="828">&gt;_ Agent B</text>
-      <text x="1290" y="774">Slot 0</text>
-      <text x="1290" y="828">Slot 1</text>
-    </g>
-    <text x="1290" y="879" font-family="DejaVu Sans Mono, monospace" font-size="25" fill="#C1C9D0">Unassigned</text>
-    <g fill="#121B23"><circle cx="1256" cy="766" r="7"/><circle cx="1256" cy="820" r="7"/></g>
-    <circle cx="1256" cy="870" r="7" fill="none" stroke="#7C8D99" stroke-width="2"/>
-    <text x="840" y="947" font-size="28" font-weight="bold" fill="#92C5E9">Stable assignments support cache reuse</text>
+    <text x="1300" y="797" font-size="25" fill="#92C5E9">Slot 0 · A</text>
+    <text x="1300" y="863" font-size="25" fill="#F1BE58">Slot 1 · B</text>
+    <text x="840" y="947" font-size="28" font-weight="bold" fill="#92C5E9">A returns → reuse A’s cached context</text>
     <text x="48" y="1035" font-size="25" fill="#C1C9D0">Pi 1.5.2 · Qwen3.8-27B example · Cache retention still depends on server settings and memory.</text>
   </g>
 </svg>

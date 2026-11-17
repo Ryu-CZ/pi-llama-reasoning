@@ -5,6 +5,8 @@
   "type": "module",
   "keywords": [
     "llama.cpp",
+    "slots",
+    "slot-pinning",
     "reasoning-effort",
     "thinking-budget",
     "reasoning",

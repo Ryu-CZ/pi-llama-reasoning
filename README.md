@@ -7,13 +7,17 @@
   <a href="https://pi.dev/packages/pi-llama-reasoning"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
 </p>
 
-Choose your llama.cpp model’s reasoning levels directly in [Pi](https://pi.dev)—not just thinking on/off.
+Native reasoning controls and automatic session slot pinning for llama.cpp in [Pi](https://pi.dev).
 
-- Choose supported levels such as `low`, `medium`, and `xhigh` with Pi’s thinking token budgets.
-- Keep Pi’s usual login, model picker, and `/llama` commands.
-- Keep sessions on separate server slots when available to reduce repeated processing when agents share one model.
+![Native reasoning levels in Pi’s thinking selector, plus automatic session-to-slot assignments across turns. Example levels: off, low, medium, xhigh. Slot assignments are illustrative; cache reuse depends on server settings and memory.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
 
-![Qwen3.8-27B reasoning levels in Pi 1.5.2: Pi alone offers off and medium; with this extension, the selector offers off, low, medium, and xhigh.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png)
+## Why use it?
+
+**Choose how your model reasons.** Thinking on/off does not expose every level a model supports. Select native levels such as `low`, `medium`, and `xhigh` through Pi’s usual thinking selector, with Pi’s thinking token budgets.
+
+**Reduce reprocessing between agents.** Sessions sharing one model can displace each other’s cached conversations. Automatic slot pinning keeps participating sessions on separate available slots across turns, helping reuse their conversation prefixes instead of processing them again. Cache retention still depends on server settings and available memory.
+
+Keep Pi’s usual login, model picker, and `/llama` commands. Your explicit reasoning, budget, sampling, slot, and cache settings are preserved.
 
 ## Install
 

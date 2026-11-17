@@ -124,6 +124,14 @@ The user subsequently requested three local slots for two subagents plus a possi
 
 A live check with three independent Pi processes observed slots 0/1/2 busy together. All three follow-ups retained their slot and each reused 927 cache-read tokens with 19 fresh tokens. All processes shut down without extension errors. CPU embeddings and Kev remained loaded. Evidence: `/tmp/pi-live-three-slots-evidence.json`. The earlier 122,500-token generation check used two configured slots; with three, full per-slot limits and shared-KV configuration were rechecked, not another near-full-pool generation.
 
+## Preview animation
+
+`media/preview-animation.html` is a self-contained, silent 20-second loop: default thinking choices → native effort discovery → possible cache displacement without pinning → stable separate slot assignments. The reasoning example is scoped to Pi 1.5.2 and Qwen. The displacement is illustrative, not a claim that every unpinned request loses cache; pinning supports but cannot guarantee cache reuse.
+
+Open the HTML in a browser; click or Space pauses, arrow keys step between scenes. `?verify&t=13` freezes an exact point for inspection. Reduced-motion preferences start playback paused. Canvas rendering uses the same deterministic `renderAt(seconds)` timeline for playback and export, avoiding compositor timing differences.
+
+Run `node media/render-preview.mjs` with Node 22+, Chromium, FFmpeg with libx264, and ImageMagick on PATH. It renders a 320×200 GIF and 640×400 H.264 MP4 at 10 fps, plus `/tmp/pi-animation-storyboard.png`. Both exports retain the gallery’s 16:10 aspect ratio. The static `pi.image` remains unchanged until the animation is approved; no `pi.video` is configured yet.
+
 ## Information flow
 
 Rendered overview: [reasoning-flow.png](media/reasoning-flow.png).

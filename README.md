@@ -9,7 +9,7 @@
 
 Extends [Pi](https://pi.dev)’s built-in llama.cpp integration with native reasoning-effort selection and automatic session slot pinning.
 
-![Pi 1.5.2 alone versus Pi with this extension: default thinking choices become model-reported native effort levels; server-selected slots become stable, colour-matched session assignments. In the unpinned example, A’s blue cached-context blocks are crossed out and replaced by B’s amber blocks in one slot; A must rebuild its context on return. With pinning, blue and amber cached contexts remain in separate slots. Pinning supports cache reuse but does not guarantee retention.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
+![Pi 1.5.2 alone versus Pi with this extension: default thinking choices become model-reported native effort levels; server-selected slots become stable, colour-matched session assignments. In the unpinned example, A’s blue cached-context blocks are crossed out and replaced by B’s amber blocks in Slot 0 while Slot 1 remains unused; A must rebuild its context on return. With pinning, blue and amber cached contexts remain in separate slots. Pinning supports cache reuse but does not guarantee retention.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
 
 ## Why use it?
 

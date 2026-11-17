@@ -47,9 +47,11 @@
 
     <!-- Cache blocks represent conversation prefixes, not reserved memory capacity. -->
     <text x="840" y="243" font-size="30" font-weight="bold">Without pinning: cached work can be lost</text>
-    <text x="840" y="282" font-size="25" fill="#C1C9D0">Example: B reuses A’s slot</text>
-    <rect x="1056" y="304" width="464" height="186" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
-    <text x="1288" y="338" font-size="24" text-anchor="middle" font-weight="bold">One shared model · Slot 0</text>
+    <text x="840" y="282" font-size="25" fill="#C1C9D0">Example: B reuses A’s slot while another is unused</text>
+    <rect x="1056" y="304" width="464" height="208" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
+    <text x="1288" y="338" font-size="24" text-anchor="middle" font-weight="bold">One shared model</text>
+    <rect x="1080" y="346" width="420" height="120" rx="7" fill="none" stroke="#7C8D99" stroke-width="2"/>
+    <text x="1300" y="416" font-size="24" font-weight="bold">Slot 0</text>
     <rect x="840" y="350" width="174" height="46" rx="7" fill="#92C5E9"/>
     <rect x="840" y="420" width="174" height="46" rx="7" fill="#F1BE58"/>
     <g font-family="DejaVu Sans Mono, monospace" font-size="25" font-weight="bold" fill="#121B23">
@@ -74,10 +76,12 @@
       <rect x="1238" y="426" width="40" height="34" rx="4"/>
     </g>
     <text x="1300" y="451" font-size="25" fill="#F1BE58">B replaces it</text>
-    <text x="840" y="535" font-size="30" font-weight="bold" fill="#F1BE58">A returns → rebuild A’s context</text>
+    <rect x="1080" y="474" width="420" height="28" rx="7" fill="none" stroke="#7C8D99" stroke-width="2" stroke-dasharray="7 5"/>
+    <text x="1290" y="495" font-size="24" text-anchor="middle" fill="#C1C9D0">Slot 1 · unused</text>
+    <text x="840" y="548" font-size="30" font-weight="bold" fill="#F1BE58">A returns → rebuild A’s context</text>
 
     <text x="840" y="655" font-size="30" font-weight="bold">With pinning: separate cached contexts</text>
-    <text x="840" y="694" font-size="25" fill="#C1C9D0">Same agents. Separate slots across turns.</text>
+    <text x="840" y="694" font-size="25" fill="#C1C9D0">Same two slots. Separate contexts across turns.</text>
     <rect x="1056" y="716" width="464" height="186" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
     <text x="1288" y="750" font-size="24" text-anchor="middle" font-weight="bold">One shared model</text>
     <rect x="840" y="766" width="174" height="46" rx="7" fill="#92C5E9"/>

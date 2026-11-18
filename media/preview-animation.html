@@ -16,7 +16,9 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 const C = { bg: '#121b23', panel: '#202a34', white: '#f2f1ed', muted: '#c1c9d0', blue: '#92c5e9', amber: '#f1be58', line: '#7c8d99' };
-const DURATION = 28;
+const SCENE_STARTS = [0, 4.5, 10.5, 16.5];
+const DURATION = 22.5;
+window.previewTiming = { duration: DURATION, starts: SCENE_STARTS, intro: 4.5 };
 const clamp = x => Math.max(0, Math.min(1, x));
 function box(x, y, w, h, fill, stroke) {
   ctx.beginPath(); ctx.roundRect(x, y, w, h, 6);
@@ -66,40 +68,61 @@ function reasoning(enhanced, t) {
     label('Model levels not discovered', 160, 182, 15, C.muted, 'center');
   }
 }
+function cacheRow(y, color, count, crossed = false) {
+  box(209, y, 84, 27, C.bg, C.line);
+  label(y === 88 ? '0' : '1', 215, y + 18, 12, C.muted);
+  for (let i = 0; i < count; i++) box(231 + i * 14, y + 6, 10, 15, color);
+  if (crossed) {
+    line(229, y + 3, 286, y + 24, C.white);
+    line(229, y + 24, 286, y + 3, C.white);
+  }
+}
+function slotState(t) {
+  // Three requests, exactly once each. The end of each beat holds its result.
+  const turn = Math.min(2, Math.floor(t / 2));
+  const beat = t - turn * 2;
+  return { turn, beat, activeB: turn === 1, progress: clamp(beat / 0.6) };
+}
 function slots(pinned, t) {
   label(pinned ? 'Each session keeps its slot' : 'Sessions can displace cache', 16, 54, 20);
-  const turn = Math.min(2, Math.floor(t / 1.6));
-  const activeB = turn === 1;
-  const activeColor = activeB ? C.amber : C.blue;
+  const { turn, beat, activeB, progress } = slotState(t);
+  const color = activeB ? C.amber : C.blue;
   const activeY = activeB ? 133 : 95;
+  const targetY = pinned && activeB ? 135 : 101;
   box(198, 68, 106, 95, C.panel, C.line);
-  label('model', 251, 83, 12, C.muted, 'center');
-  const firstColor = pinned || !activeB ? C.blue : C.amber;
-  box(209, 88, 84, 22, firstColor);
-  box(209, 122, 84, 22, pinned && t > 1.6 ? C.amber : C.bg, pinned && t > 1.6 ? null : C.line);
-  label('slot 0', 251, 104, 13, C.bg, 'center');
-  label('slot 1', 251, 138, 13, pinned && t > 1.6 ? C.bg : C.muted, 'center');
+  label('model · slots', 251, 83, 11, C.muted, 'center');
   if (pinned) {
-    line(104, 95, 209, 99, C.blue); line(104, 133, 209, 133, C.amber);
+    const built = Math.floor(clamp((beat - 0.6) / 0.8) * 4);
+    cacheRow(88, C.blue, turn === 0 ? built : 4);
+    cacheRow(122, C.amber, turn === 0 ? 0 : turn === 1 ? built : 4);
+    line(104, 95, 207, 101, C.blue);
+    line(104, 133, 207, 135, C.amber);
   } else {
-    line(104, activeY, 209, 99, activeColor);
+    const replacing = turn > 0;
+    const previousColor = activeB ? C.blue : C.amber;
+    const crossed = replacing && beat >= 0.6 && beat < 1.0;
+    const rebuilding = !replacing || beat >= 1.0;
+    const built = Math.floor(clamp((beat - (replacing ? 1.0 : 0.6)) / 0.6) * 4);
+    cacheRow(88, rebuilding ? color : previousColor, rebuilding ? built : 4, crossed);
+    cacheRow(122, C.line, 0);
+    label('unused', 260, 140, 10, C.muted, 'center');
+    line(104, activeY, 207, 101, color);
   }
   box(16, 83, 88, 25, C.blue); box(16, 121, 88, 25, C.amber);
   label('>_ Agent A', 24, 101, 13, C.bg); label('>_ Agent B', 24, 139, 13, C.bg);
-  pulse(106, activeY, 207, pinned && activeB ? 133 : 99, (t % 1.6) / 0.8, activeColor);
-  if (!pinned && turn > 0) {
-    // One possible displacement, not a claim that every unpinned request misses cache.
-    const flash = clamp(1 - (t % 1.6) / 0.65);
-    ctx.globalAlpha = flash;
-    line(214, 91, 286, 107, C.bg, 3); line(214, 107, 286, 91, C.bg, 3);
-    ctx.globalAlpha = 1;
-  }
-  label(pinned ? 'Supports cache reuse' : 'Cache invalidation → reprocess', 160, 182, pinned ? 17 : 16, pinned ? C.blue : C.amber, 'center');
+  pulse(106, activeY, 207, targetY, progress, color);
+  let caption;
+  if (turn === 0) caption = 'A builds cached context';
+  else if (pinned) caption = activeB ? 'B builds its own cache' : 'A returns → reuses cache';
+  else if (activeB) caption = beat < 0.6 ? 'B targets A’s slot' : beat < 1 ? 'A’s cached context lost' : 'B replaces A’s cache';
+  else caption = beat < 0.6 ? 'A returns: its cache is gone' : 'A must rebuild context';
+  label(caption, 160, 182, 16, pinned ? C.blue : C.amber, 'center');
 }
 // One deterministic timeline drives playback, inspection, and frame export.
 window.renderAt = function(seconds) {
   const time = ((seconds % DURATION) + DURATION) % DURATION;
-  const scene = Math.floor(time / 7), local = time % 7;
+  const scene = SCENE_STARTS.findLastIndex(start => time >= start);
+  const local = time - SCENE_STARTS[scene];
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.globalAlpha = 1;
   ctx.fillStyle = C.bg; ctx.fillRect(0, 0, 320, 200);
   label(scene % 2 ? 'Pi + extension' : scene < 2 ? 'Pi 1.5.2 · Qwen example' : 'Pi 1.5.2 alone', 16, 23, scene === 0 ? 12 : 15, scene % 2 ? C.blue : C.muted);
@@ -119,8 +142,9 @@ requestAnimationFrame(tick);
 canvas.addEventListener('click', () => { paused = !paused; });
 window.addEventListener('keydown', event => {
   if (event.code === 'Space') { event.preventDefault(); paused = !paused; }
-  if (event.code === 'ArrowRight') { elapsed = (Math.floor(elapsed / 7) + 1) * 7; paused = true; }
-  if (event.code === 'ArrowLeft') { elapsed = Math.max(0, (Math.floor(elapsed / 7) - 1) * 7); paused = true; }
+  const scene = SCENE_STARTS.findLastIndex(start => elapsed % DURATION >= start);
+  if (event.code === 'ArrowRight') { elapsed = SCENE_STARTS[(scene + 1) % 4]; paused = true; }
+  if (event.code === 'ArrowLeft') { elapsed = SCENE_STARTS[Math.max(0, scene - 1)]; paused = true; }
 });
 </script>
 </body>

@@ -59,19 +59,22 @@ try {
     await delay(50);
   }
   await evaluate('document.fonts.ready.then(() => true)');
-  for (let frame = 0; frame < 280; frame++) {
+  const timing = await evaluate('window.previewTiming');
+  const frameCount = Math.round(timing.duration * 10);
+  const introFrames = Math.round(timing.intro * 10);
+  for (let frame = 0; frame < frameCount; frame++) {
     const png = await evaluate(`window.renderAt(${frame / 10}); document.querySelector('canvas').toDataURL('image/png').split(',')[1]`);
     await writeFile(join(temporary, `${String(frame).padStart(4, '0')}.png`), Buffer.from(png, 'base64'));
   }
-  for (const [name, time] of [['default', 3], ['efforts', 10], ['displaced', 17], ['pinned', 24]]) {
+  for (const [name, time] of [['default', 3], ['efforts', 8], ['displaced', 13.3], ['pinned', 21.5]]) {
     const png = await evaluate(`window.renderAt(${time}); document.querySelector('canvas').toDataURL('image/png').split(',')[1]`);
     await writeFile(join(temporary, `${name}.png`), Buffer.from(png, 'base64'));
   }
   const frames = join(temporary, '%04d.png');
   const poster = join(temporary, 'poster.png');
   execFileSync('magick', [join(directory, 'preview.png'), '-resize', '640x400', poster]);
-  for (let frame = 0; frame < 350; frame++) {
-    const source = frame < 70 ? poster : join(temporary, `${String(frame - 70).padStart(4, '0')}.png`);
+  for (let frame = 0; frame < frameCount + introFrames; frame++) {
+    const source = frame < introFrames ? poster : join(temporary, `${String(frame - introFrames).padStart(4, '0')}.png`);
     await copyFile(source, join(temporary, `gif-${String(frame).padStart(4, '0')}.png`));
   }
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', join(temporary, 'gif-%04d.png'),
@@ -83,7 +86,7 @@ try {
   execFileSync('magick', [join(temporary, 'default.png'), join(temporary, 'efforts.png'),
     join(temporary, 'displaced.png'), join(temporary, 'pinned.png'), '-resize', '320x200',
     '-append', join(tmpdir(), 'pi-animation-storyboard.png')]);
-  console.log('Rendered 35s GIF (320×200; 7s static intro), 28s MP4 (640×400), and /tmp/pi-animation-storyboard.png');
+  console.log(`Rendered ${timing.duration + timing.intro}s GIF (320×200; ${timing.intro}s static intro), ${timing.duration}s MP4 (640×400), and /tmp/pi-animation-storyboard.png`);
 } finally {
   socket?.close();
   browser.kill();

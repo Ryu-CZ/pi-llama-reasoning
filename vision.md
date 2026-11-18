@@ -130,7 +130,7 @@ A live check with three independent Pi processes observed slots 0/1/2 busy toget
 
 Open the HTML in a browser; click or Space pauses, arrow keys step between scenes. `?verify&t=13` freezes an exact point for inspection. Reduced-motion preferences start playback paused. Canvas rendering uses the same deterministic `renderAt(seconds)` timeline for playback and export, avoiding compositor timing differences.
 
-Run `node media/render-preview.mjs` with Node 22+, Chromium, FFmpeg with libx264, and ImageMagick on PATH. It renders a 320×200 GIF and 640×400 H.264 MP4 at 10 fps, plus `/tmp/pi-animation-storyboard.png`. Both exports retain the gallery’s 16:10 aspect ratio. Following pi-herdr-flock’s metadata convention, `pi.image` points to `media/preview-animation.gif` and `pi.video` to `media/preview-animation.mp4`. The README uses the separate detailed comparison at `media/readme-preview.png`; `media/preview.png` remains the static thumbnail asset.
+Run `node media/render-preview.mjs` with Node 22+, Chromium, FFmpeg with libx264, and ImageMagick on PATH. It renders a 320×200 GIF and 640×400 H.264 MP4 at 10 fps, plus `/tmp/pi-animation-storyboard.png`. The GIF holds the simplified static `media/preview.png` for 0.6 seconds before the 20-second animation (20.6 seconds total); the MP4 remains 20 seconds. Both exports retain the gallery’s 16:10 aspect ratio. Following pi-herdr-flock’s metadata convention, `pi.image` points to `media/preview-animation.gif` and `pi.video` to `media/preview-animation.mp4`. The README uses the separate detailed comparison at `media/readme-preview.png`; `media/preview.png` remains the static thumbnail asset.
 
 ## Information flow
 

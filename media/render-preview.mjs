@@ -1,7 +1,7 @@
 // Requires Chromium, FFmpeg (libx264), and ImageMagick on PATH; Node 22+.
 // Run: node media/render-preview.mjs
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, copyFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -68,7 +68,13 @@ try {
     await writeFile(join(temporary, `${name}.png`), Buffer.from(png, 'base64'));
   }
   const frames = join(temporary, '%04d.png');
-  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', frames,
+  const poster = join(temporary, 'poster.png');
+  execFileSync('magick', [join(directory, 'preview.png'), '-resize', '640x400', poster]);
+  for (let frame = 0; frame < 206; frame++) {
+    const source = frame < 6 ? poster : join(temporary, `${String(frame - 6).padStart(4, '0')}.png`);
+    await copyFile(source, join(temporary, `gif-${String(frame).padStart(4, '0')}.png`));
+  }
+  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', join(temporary, 'gif-%04d.png'),
     '-vf', 'scale=320:200:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer',
     '-loop', '0', join(directory, 'preview-animation.gif')]);
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', frames,
@@ -77,7 +83,7 @@ try {
   execFileSync('magick', [join(temporary, 'default.png'), join(temporary, 'efforts.png'),
     join(temporary, 'displaced.png'), join(temporary, 'pinned.png'), '-resize', '320x200',
     '-append', join(tmpdir(), 'pi-animation-storyboard.png')]);
-  console.log('Rendered 20s GIF (320×200), MP4 (640×400), and /tmp/pi-animation-storyboard.png');
+  console.log('Rendered 20.6s GIF (320×200; 0.6s static intro), 20s MP4 (640×400), and /tmp/pi-animation-storyboard.png');
 } finally {
   socket?.close();
   browser.kill();

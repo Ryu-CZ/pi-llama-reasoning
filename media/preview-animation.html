@@ -18,7 +18,7 @@ const ctx = canvas.getContext('2d');
 const C = { bg: '#121b23', panel: '#202a34', white: '#f2f1ed', muted: '#c1c9d0', blue: '#92c5e9', amber: '#f1be58', line: '#7c8d99' };
 const SCENE_STARTS = [0, 4.5, 14.5, 20.5];
 const DURATION = 26.5;
-window.previewTiming = { duration: DURATION, starts: SCENE_STARTS, intro: 4.5 };
+window.previewTiming = { duration: DURATION, starts: SCENE_STARTS, intro: 3.5 };
 const clamp = x => Math.max(0, Math.min(1, x));
 function box(x, y, w, h, fill, stroke) {
   ctx.beginPath(); ctx.roundRect(x, y, w, h, 6);

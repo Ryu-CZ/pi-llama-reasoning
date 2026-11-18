@@ -77,14 +77,11 @@ try {
     const source = frame < introFrames ? poster : join(temporary, `${String(frame - introFrames).padStart(4, '0')}.png`);
     await copyFile(source, join(temporary, `gif-${String(frame).padStart(4, '0')}.png`));
   }
-  execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', join(temporary, 'gif-%04d.png'),
-    '-vf', 'scale=320:200:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=none',
-    '-loop', '0', join(directory, 'preview-animation.gif')]);
-  // Compact companion GIF: a 32-colour palette plus gifsicle's lossless frame merging.
   const compact = join(temporary, 'compact.gif');
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', join(temporary, 'gif-%04d.png'),
     '-vf', 'scale=320:200:flags=lanczos,split[a][b];[a]palettegen=max_colors=32[p];[b][p]paletteuse=dither=none',
     '-loop', '0', compact]);
+  // Gifsicle merges identical held frames and stores only changed regions.
   execFileSync('gifsicle', ['-O3', compact, '-o', join(directory, 'pi-preview.gif')]);
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', frames,
     '-c:v', 'libx264', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
@@ -92,7 +89,7 @@ try {
   execFileSync('magick', [join(temporary, 'default.png'), join(temporary, 'efforts.png'),
     join(temporary, 'displaced.png'), join(temporary, 'pinned.png'), '-resize', '320x200',
     '-append', join(tmpdir(), 'pi-animation-storyboard.png')]);
-  console.log(`Rendered ${timing.duration + timing.intro}s GIF (320×200; ${timing.intro}s static intro), compact media/pi-preview.gif, ${timing.duration}s MP4 (640×400), and /tmp/pi-animation-storyboard.png`);
+  console.log(`Rendered ${timing.duration + timing.intro}s GIF (320×200; ${timing.intro}s static intro), ${timing.duration}s MP4 (640×400), and /tmp/pi-animation-storyboard.png`);
 } finally {
   socket?.close();
   browser.kill();

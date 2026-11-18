@@ -49,7 +49,13 @@
 
     <!-- Cache blocks represent conversation prefixes, not reserved memory capacity. -->
     <text x="840" y="243" font-size="30" font-weight="bold">Without pinning: cached work can be lost</text>
-    <text x="840" y="282" font-size="25" fill="#C1C9D0">Example: B reuses A’s slot while another is unused</text>
+    <text x="840" y="282" font-size="25" fill="#C1C9D0">Example:</text>
+    <rect x="960" y="257" width="30" height="32" rx="5" fill="#F1BE58"/>
+    <text x="975" y="282" font-size="25" font-weight="bold" text-anchor="middle" fill="#121B23">B</text>
+    <text x="998" y="282" font-size="25" fill="#C1C9D0">reuses</text>
+    <rect x="1087" y="257" width="30" height="32" rx="5" fill="#92C5E9"/>
+    <text x="1102" y="282" font-size="25" font-weight="bold" text-anchor="middle" fill="#121B23">A</text>
+    <text x="1120" y="282" font-size="25" fill="#C1C9D0">’s slot while another is unused</text>
     <rect x="1056" y="304" width="464" height="208" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
     <text x="1288" y="338" font-size="24" text-anchor="middle" font-weight="bold">One shared model</text>
     <rect x="1080" y="346" width="420" height="120" rx="7" fill="none" stroke="#7C8D99" stroke-width="2"/>
@@ -68,7 +74,9 @@
       <rect x="1238" y="355" width="40" height="34" rx="4"/>
     </g>
     <path d="M1090 351 L1282 393 M1090 393 L1282 351" stroke="#F2F1ED" stroke-width="5" stroke-linecap="round"/>
-    <text x="1300" y="380" font-size="25" fill="#92C5E9">A’s cache lost</text>
+    <rect x="1300" y="355" width="30" height="32" rx="5" fill="#92C5E9"/>
+    <text x="1315" y="380" font-size="25" font-weight="bold" text-anchor="middle" fill="#121B23">A</text>
+    <text x="1333" y="380" font-size="25">’s cache lost</text>
     <path d="M1186 399 V417 M1176 407 L1186 417 L1196 407" stroke="#F1BE58" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     <g fill="#F1BE58">
       <rect x="1094" y="426" width="40" height="34" rx="4"/>
@@ -76,10 +84,14 @@
       <rect x="1190" y="426" width="40" height="34" rx="4"/>
       <rect x="1238" y="426" width="40" height="34" rx="4"/>
     </g>
-    <text x="1300" y="451" font-size="25" fill="#F1BE58">B takes slot 0</text>
+    <rect x="1300" y="426" width="30" height="32" rx="5" fill="#F1BE58"/>
+    <text x="1315" y="451" font-size="25" font-weight="bold" text-anchor="middle" fill="#121B23">B</text>
+    <text x="1338" y="451" font-size="25">takes slot 0</text>
     <rect x="1080" y="474" width="420" height="28" rx="7" fill="none" stroke="#7C8D99" stroke-width="2" stroke-dasharray="7 5"/>
     <text x="1290" y="495" font-size="24" text-anchor="middle" fill="#C1C9D0">Slot 1 · unused</text>
-    <text x="840" y="548" font-size="30" font-weight="bold" fill="#F1BE58">A returns → rebuild A’s context</text>
+    <rect x="840" y="519" width="36" height="36" rx="6" fill="#92C5E9"/>
+    <text x="858" y="548" font-size="30" font-weight="bold" text-anchor="middle" fill="#121B23">A</text>
+    <text x="884" y="548" font-size="30" font-weight="bold">returns → rebuild context</text>
 
     <text x="840" y="655" font-size="30" font-weight="bold">With pinning: separate cached contexts</text>
     <text x="840" y="694" font-size="25" fill="#C1C9D0">Same two slots. Separate contexts across turns.</text>
@@ -107,9 +119,17 @@
       <rect x="1190" y="838" width="40" height="34" rx="4"/>
       <rect x="1238" y="838" width="40" height="34" rx="4"/>
     </g>
-    <text x="1300" y="797" font-size="25" fill="#92C5E9">Slot 0 · A</text>
-    <text x="1300" y="863" font-size="25" fill="#F1BE58">Slot 1 · B</text>
-    <text x="840" y="947" font-size="28" font-weight="bold" fill="#92C5E9">A returns → reuse A’s cached context</text>
+    <text x="1300" y="797" font-size="25">Slot 0 ·</text>
+    <text x="1300" y="863" font-size="25">Slot 1 ·</text>
+    <rect x="1398" y="772" width="30" height="32" rx="5" fill="#92C5E9"/>
+    <rect x="1398" y="838" width="30" height="32" rx="5" fill="#F1BE58"/>
+    <g font-size="25" font-weight="bold" text-anchor="middle" fill="#121B23">
+      <text x="1413" y="797">A</text>
+      <text x="1413" y="863">B</text>
+    </g>
+    <rect x="840" y="918" width="36" height="36" rx="6" fill="#92C5E9"/>
+    <text x="858" y="947" font-size="30" font-weight="bold" text-anchor="middle" fill="#121B23">A</text>
+    <text x="884" y="947" font-size="30" font-weight="bold">returns → reuse cached context</text>
     <text x="72" y="1035" font-size="25" fill="#C1C9D0">Pi 1.5.2 · Qwen3.8-27B example · Cache retention still depends on server settings and memory.</text>
   </g>
 </svg>

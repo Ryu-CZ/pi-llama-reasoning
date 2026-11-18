@@ -44,7 +44,8 @@
     "typescript": "7.0.2"
   },
   "pi": {
-    "image": "https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview.png",
+    "image": "https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview-animation.gif",
+    "video": "https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/preview-animation.mp4",
     "extensions": ["./extensions/index.ts"]
   }
 }

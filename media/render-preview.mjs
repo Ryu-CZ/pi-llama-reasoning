@@ -66,7 +66,7 @@ try {
     const png = await evaluate(`window.renderAt(${frame / 10}); document.querySelector('canvas').toDataURL('image/png').split(',')[1]`);
     await writeFile(join(temporary, `${String(frame).padStart(4, '0')}.png`), Buffer.from(png, 'base64'));
   }
-  for (const [name, time] of [['default', 3], ['efforts', 8], ['displaced', 13.3], ['pinned', 21.5]]) {
+  for (const [name, time] of [['default', 3], ['efforts', timing.starts[1] + 5.8], ['displaced', timing.starts[2] + 2.8], ['pinned', timing.starts[3] + 5]]) {
     const png = await evaluate(`window.renderAt(${time}); document.querySelector('canvas').toDataURL('image/png').split(',')[1]`);
     await writeFile(join(temporary, `${name}.png`), Buffer.from(png, 'base64'));
   }

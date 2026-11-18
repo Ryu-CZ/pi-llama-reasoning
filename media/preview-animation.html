@@ -84,6 +84,19 @@ function reasoning(enhanced, t) {
     label('Pi shows its default choices', 160, 182, 15, C.muted, 'center');
   }
 }
+function agentCaption(text) {
+  ctx.font = 'bold 16px sans-serif';
+  const parts = text.split(/(\b[AB]\b)/).filter(Boolean);
+  const widths = parts.map(part => part === 'A' || part === 'B' ? 24 : ctx.measureText(part).width);
+  let x = (320 - widths.reduce((sum, width) => sum + width, 0)) / 2;
+  parts.forEach((part, index) => {
+    if (part === 'A' || part === 'B') {
+      box(x, 163, 24, 24, part === 'A' ? C.blue : C.amber);
+      label(part, x + 12, 181, 16, C.bg, 'center');
+    } else label(part, x, 182, 16, C.white);
+    x += widths[index];
+  });
+}
 function cacheRow(y, color, count, crossed = false) {
   box(209, y, 84, 27, C.bg, C.line);
   label(y === 88 ? '0' : '1', 215, y + 18, 12, C.muted);
@@ -130,9 +143,9 @@ function slots(pinned, t) {
   let caption;
   if (turn === 0) caption = 'A builds cache';
   else if (pinned) caption = activeB ? 'B uses its own slot' : 'A reuses cache';
-  else if (activeB) caption = beat < 0.6 ? 'B uses A’s slot' : 'A’s cache lost';
+  else if (activeB) caption = beat < 0.6 ? 'B uses A’s slot' : 'A loses its cache';
   else caption = 'A rebuilds cache';
-  label(caption, 160, 182, 16, pinned ? C.blue : C.amber, 'center');
+  agentCaption(caption);
 }
 // One deterministic timeline drives playback, inspection, and frame export.
 window.renderAt = function(seconds) {

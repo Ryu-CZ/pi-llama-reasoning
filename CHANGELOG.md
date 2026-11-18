@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Show `/llama-slots` as a tree of slots, counters, and session assignments.
 
+### Fixed
+
+- Update pi.dev preview metadata and search keywords to cover reasoning efforts and slot pinning.
+- Clarify README setup, usage, and cache-reuse limits with updated visual previews.
+
 ## [0.2.1] - 2026-11-17
 
 ### Added

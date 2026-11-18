@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080">
   <rect width="1600" height="1080" fill="#121B23"/>
   <g font-family="DejaVu Sans, sans-serif" fill="#F2F1ED">
-    <text x="48" y="84" font-size="56" font-weight="bold">Same Pi. Same llama.cpp. Two missing pieces.</text>
+    <text x="72" y="84" font-size="56" font-weight="bold">Same Pi. Same llama.cpp. Two missing pieces.</text>
     <text x="72" y="155" font-size="36" font-weight="bold">Native reasoning effort</text>
     <text x="842" y="155" font-size="36" font-weight="bold">Session slot pinning</text>
     <rect x="32" y="188" width="1536" height="384" rx="22" fill="#202A34"/>
@@ -35,8 +35,10 @@
     <g fill="#92C5E9">
       <path d="M556 386 L602 370 V407 H556 Z M614 366 L660 350 V407 H614 Z M672 346 L718 330 V407 H672 Z"/>
       <path d="M556 798 L602 782 V819 H556 Z M614 778 L660 762 V819 H614 Z M672 758 L718 742 V819 H672 Z"/>
-      <path d="M188 833 L232 817 V849 H188 Z M244 813 L288 797 V849 H244 Z M300 793 L344 777 V849 H300 Z"/>
+      <path d="M188 833 L232 817 V849 H188 Z M300 793 L344 777 V849 H300 Z"/>
     </g>
+    <!-- The chosen level takes Pi's colour, matching the animated preview. -->
+    <path fill="#F2F1ED" d="M244 813 L288 797 V849 H244 Z"/>
     <path d="M394 390 H525" stroke="#7C8D99" stroke-width="5"/>
     <text x="459" y="373" font-size="34" text-anchor="middle" fill="#C1C9D0">?</text>
     <rect x="374" y="732" width="36" height="140" rx="6" fill="#92C5E9"/>
@@ -51,7 +53,6 @@
     <rect x="1056" y="304" width="464" height="208" rx="14" fill="#121B23" stroke="#C1C9D0" stroke-width="3"/>
     <text x="1288" y="338" font-size="24" text-anchor="middle" font-weight="bold">One shared model</text>
     <rect x="1080" y="346" width="420" height="120" rx="7" fill="none" stroke="#7C8D99" stroke-width="2"/>
-    <text x="1300" y="416" font-size="24" font-weight="bold">Slot 0</text>
     <rect x="840" y="350" width="174" height="46" rx="7" fill="#92C5E9"/>
     <rect x="840" y="420" width="174" height="46" rx="7" fill="#F1BE58"/>
     <g font-family="DejaVu Sans Mono, monospace" font-size="25" font-weight="bold" fill="#121B23">
@@ -75,7 +76,7 @@
       <rect x="1190" y="426" width="40" height="34" rx="4"/>
       <rect x="1238" y="426" width="40" height="34" rx="4"/>
     </g>
-    <text x="1300" y="451" font-size="25" fill="#F1BE58">B replaces it</text>
+    <text x="1300" y="451" font-size="25" fill="#F1BE58">B takes slot 0</text>
     <rect x="1080" y="474" width="420" height="28" rx="7" fill="none" stroke="#7C8D99" stroke-width="2" stroke-dasharray="7 5"/>
     <text x="1290" y="495" font-size="24" text-anchor="middle" fill="#C1C9D0">Slot 1 · unused</text>
     <text x="840" y="548" font-size="30" font-weight="bold" fill="#F1BE58">A returns → rebuild A’s context</text>
@@ -109,6 +110,6 @@
     <text x="1300" y="797" font-size="25" fill="#92C5E9">Slot 0 · A</text>
     <text x="1300" y="863" font-size="25" fill="#F1BE58">Slot 1 · B</text>
     <text x="840" y="947" font-size="28" font-weight="bold" fill="#92C5E9">A returns → reuse A’s cached context</text>
-    <text x="48" y="1035" font-size="25" fill="#C1C9D0">Pi 1.5.2 · Qwen3.8-27B example · Cache retention still depends on server settings and memory.</text>
+    <text x="72" y="1035" font-size="25" fill="#C1C9D0">Pi 1.5.2 · Qwen3.8-27B example · Cache retention still depends on server settings and memory.</text>
   </g>
 </svg>

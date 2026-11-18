@@ -78,7 +78,7 @@ try {
     await copyFile(source, join(temporary, `gif-${String(frame).padStart(4, '0')}.png`));
   }
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', join(temporary, 'gif-%04d.png'),
-    '-vf', 'scale=320:200:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer',
+    '-vf', 'scale=320:200:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=none',
     '-loop', '0', join(directory, 'preview-animation.gif')]);
   execFileSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-framerate', '10', '-i', frames,
     '-c:v', 'libx264', '-crf', '23', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',

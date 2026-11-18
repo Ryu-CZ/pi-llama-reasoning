@@ -11,7 +11,7 @@
 </style>
 </head>
 <body>
-<canvas width="640" height="400" aria-label="Animated comparison of native reasoning discovery and session slot pinning. Pi alone versus Pi with the extension."></canvas>
+<canvas width="640" height="400" aria-label="Pi 1.5.2 with and without the extension. Qwen example: discover model-supported thinking levels. Illustrative slot example: rebuild displaced context versus reuse separate caches. Cache retention depends on server settings and memory."></canvas>
 <script>
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
@@ -50,12 +50,12 @@ function pulse(x1, y1, x2, y2, progress, color) {
   ctx.fillStyle = color; ctx.fill();
 }
 function reasoning(enhanced, t) {
-  label(enhanced ? 'Native effort revealed' : 'Native effort unseen', 16, 54, 22);
+  label(enhanced ? 'Choose thinking effort' : 'Missing thinking levels', 16, 54, 22);
   box(16, 76, 135, 82, C.panel, enhanced ? C.blue : C.line);
   box(207, 76, 97, 82, C.panel, C.line);
   label('>_ Pi', 27, 98, 16);
   wedge(220, 91, 70, 40);
-  label('model', 255, 148, 13, C.muted, 'center');
+  label('Qwen', 255, 148, 13, C.muted, 'center');
   line(153, 117, 205, 117, enhanced ? C.blue : C.line);
   if (enhanced) {
     box(140, 76, 12, 82, C.blue);
@@ -65,7 +65,7 @@ function reasoning(enhanced, t) {
   } else {
     label('off · medium', 84, 133, 16, C.white, 'center');
     label('?', 178, 106, 19, C.muted, 'center');
-    label('Model levels not discovered', 160, 182, 15, C.muted, 'center');
+    label('Pi shows its default choices', 160, 182, 15, C.muted, 'center');
   }
 }
 function cacheRow(y, color, count, crossed = false) {
@@ -84,7 +84,7 @@ function slotState(t) {
   return { turn, beat, activeB: turn === 1, progress: clamp(beat / 0.6) };
 }
 function slots(pinned, t) {
-  label(pinned ? 'Each session keeps its slot' : 'Sessions can displace cache', 16, 54, 20);
+  label(pinned ? 'Cached context reused' : 'Context processed again', 16, 54, 22);
   const { turn, beat, activeB, progress } = slotState(t);
   const color = activeB ? C.amber : C.blue;
   const activeY = activeB ? 133 : 95;
@@ -112,10 +112,10 @@ function slots(pinned, t) {
   label('>_ Agent A', 24, 101, 13, C.bg); label('>_ Agent B', 24, 139, 13, C.bg);
   pulse(106, activeY, 207, targetY, progress, color);
   let caption;
-  if (turn === 0) caption = 'A builds cached context';
-  else if (pinned) caption = activeB ? 'B builds its own cache' : 'A returns → reuses cache';
-  else if (activeB) caption = beat < 0.6 ? 'B targets A’s slot' : beat < 1 ? 'A’s cached context lost' : 'B replaces A’s cache';
-  else caption = beat < 0.6 ? 'A returns: its cache is gone' : 'A must rebuild context';
+  if (turn === 0) caption = 'A builds cache';
+  else if (pinned) caption = activeB ? 'B uses its own slot' : 'A reuses cache';
+  else if (activeB) caption = beat < 0.6 ? 'B uses A’s slot' : 'A’s cache lost';
+  else caption = 'A rebuilds cache';
   label(caption, 160, 182, 16, pinned ? C.blue : C.amber, 'center');
 }
 // One deterministic timeline drives playback, inspection, and frame export.
@@ -125,8 +125,8 @@ window.renderAt = function(seconds) {
   const local = time - SCENE_STARTS[scene];
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.globalAlpha = 1;
   ctx.fillStyle = C.bg; ctx.fillRect(0, 0, 320, 200);
-  label(scene % 2 ? 'Pi + extension' : scene < 2 ? 'Pi 1.5.2 · Qwen example' : 'Pi 1.5.2 alone', 16, 23, scene === 0 ? 12 : 15, scene % 2 ? C.blue : C.muted);
-  label(scene < 2 ? 'REASONING' : 'SLOTS', 304, 23, 11, C.muted, 'right');
+  label(scene % 2 ? 'With extension' : 'Without extension', 16, 23, 15, scene % 2 ? C.blue : C.muted);
+  label(scene < 2 ? 'Qwen example' : 'Slot example', 304, 23, 11, C.muted, 'right');
   if (scene < 2) reasoning(scene === 1, local); else slots(scene === 3, local);
   for (let i = 0; i < 4; i++) box(134 + i * 14, 193, 9, 3, i === scene ? C.blue : C.line);
 };

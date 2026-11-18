@@ -53,27 +53,22 @@ function pulse(x1, y1, x2, y2, progress, color) {
 }
 function reasoning(enhanced, t) {
   label(enhanced ? 'Choose thinking effort' : 'Missing thinking levels', 16, 54, 22);
-  box(16, 76, 135, 82, C.panel, enhanced ? C.blue : C.line);
+  box(16, 76, 135, 82, C.panel, enhanced ? C.white : C.line);
   box(207, 76, 97, 82, C.panel, C.line);
   label('>_ Pi', 27, 98, 16);
   wedge(220, 91, 70, 40);
   label('Qwen', 255, 148, 13, C.muted, 'center');
-  line(153, 117, 205, 117, enhanced ? C.blue : C.line);
+  line(153, 117, 205, 117, enhanced ? (t >= 3.6 ? C.white : C.blue) : C.line);
   if (enhanced) {
     box(140, 76, 12, 82, C.blue);
     // Discovery is a logical exchange, not a count of underlying HTTP requests.
     pulse(153, 117, 204, 117, clamp((t - 0.3) / 0.8), C.blue);
     pulse(204, 117, 153, 117, clamp((t - 1.3) / 0.8), C.blue);
-    wedge(29, 110, 105, 37, clamp((t - 2.1) / 0.6), t >= 3 ? 1 : null);
+    if (t < 2.1) label('?', 82, 139, 30, C.muted, 'center');
+    else wedge(29, 110, 105, 37, clamp((t - 2.1) / 0.6), t >= 3 ? 1 : null);
     if (t >= 3.6 && t < 4.5) {
-      // Pi's generation path starts at Pi itself, not at the extension tab.
-      line(80, 76, 80, 65, C.white, 2);
-      line(80, 65, 255, 65, C.white, 2);
-      line(255, 65, 255, 76, C.white, 2);
-      const distance = (t - 3.6) / 0.9 * 197;
-      if (distance < 11) pulse(80, 76, 80, 65, distance / 11, C.white);
-      else if (distance < 186) pulse(80, 65, 255, 65, (distance - 11) / 175, C.white);
-      else pulse(255, 65, 255, 76, (distance - 186) / 11, C.white);
+      // Colour distinguishes Pi's generation from discovery on the same connection.
+      pulse(153, 117, 204, 117, clamp((t - 3.6) / 0.9), C.white);
       label('Pi sends the request', 160, 182, 17, C.white, 'center');
     } else if (t < 2.7) {
       label('Discover model levels', 160, 182, 17, C.blue, 'center');

@@ -16,7 +16,7 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 const C = { bg: '#121b23', panel: '#202a34', white: '#f2f1ed', muted: '#c1c9d0', blue: '#92c5e9', amber: '#f1be58', line: '#7c8d99' };
-const DURATION = 20;
+const DURATION = 28;
 const clamp = x => Math.max(0, Math.min(1, x));
 function box(x, y, w, h, fill, stroke) {
   ctx.beginPath(); ctx.roundRect(x, y, w, h, 6);
@@ -99,7 +99,7 @@ function slots(pinned, t) {
 // One deterministic timeline drives playback, inspection, and frame export.
 window.renderAt = function(seconds) {
   const time = ((seconds % DURATION) + DURATION) % DURATION;
-  const scene = Math.floor(time / 5), local = time % 5;
+  const scene = Math.floor(time / 7), local = time % 7;
   ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.globalAlpha = 1;
   ctx.fillStyle = C.bg; ctx.fillRect(0, 0, 320, 200);
   label(scene % 2 ? 'Pi + extension' : scene < 2 ? 'Pi 1.5.2 · Qwen example' : 'Pi 1.5.2 alone', 16, 23, scene === 0 ? 12 : 15, scene % 2 ? C.blue : C.muted);
@@ -119,8 +119,8 @@ requestAnimationFrame(tick);
 canvas.addEventListener('click', () => { paused = !paused; });
 window.addEventListener('keydown', event => {
   if (event.code === 'Space') { event.preventDefault(); paused = !paused; }
-  if (event.code === 'ArrowRight') { elapsed = (Math.floor(elapsed / 5) + 1) * 5; paused = true; }
-  if (event.code === 'ArrowLeft') { elapsed = Math.max(0, (Math.floor(elapsed / 5) - 1) * 5); paused = true; }
+  if (event.code === 'ArrowRight') { elapsed = (Math.floor(elapsed / 7) + 1) * 7; paused = true; }
+  if (event.code === 'ArrowLeft') { elapsed = Math.max(0, (Math.floor(elapsed / 7) - 1) * 7); paused = true; }
 });
 </script>
 </body>

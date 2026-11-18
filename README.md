@@ -9,17 +9,16 @@
 
 Extends [Pi](https://pi.dev)’s built-in llama.cpp integration with native reasoning-effort selection and automatic session slot pinning.
 
-![Pi 1.5.2 alone versus Pi with this extension: default thinking choices become model-reported native effort levels; server-selected slots become stable, colour-matched session assignments. In the unpinned example, A’s blue cached-context blocks are crossed out and replaced by B’s amber blocks in Slot 0 while Slot 1 remains unused; A must rebuild its context on return. With pinning, blue and amber cached contexts remain in separate slots. Pinning supports cache reuse but does not guarantee retention.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
+![Pi 1.5.2 with and without the extension: discover and select native reasoning levels; keep agents A and B on separate slots to support cache reuse. The unpinned example shows B displacing A’s cached context while another slot is unused. Pinning does not guarantee cache retention.](https://raw.githubusercontent.com/Ryu-CZ/pi-llama-reasoning/main/media/readme-preview.png)
 
 ## Why use it?
 
-Pi 1.5.2’s built-in llama.cpp integration handles connection, model selection, and generation, but does not discover the model’s native reasoning-effort levels or automatically pin sessions to separate server slots. This package adds those two capabilities using information reported by llama.cpp, without replacing Pi’s provider.
+Pi 1.5.2 already handles connection, model selection, and generation. This extension adds:
 
-**Choose how your model reasons.** Select supported native levels such as `low`, `medium`, and `xhigh` through Pi’s usual thinking selector, with Pi’s thinking token budgets.
+- **Native reasoning levels:** choose model-reported efforts such as `low`, `medium`, and `xhigh` through Pi’s thinking selector.
+- **Automatic slot pinning:** keep sessions on separate available server slots across turns, reducing the chance that agents displace each other’s cached conversations.
 
-**Reduce reprocessing between agents.** Sessions sharing one model can displace each other’s cached conversations. Automatic slot pinning keeps participating sessions on separate available slots across turns, helping reuse their conversation prefixes instead of processing them again. Cache retention still depends on server settings and available memory.
-
-Keep Pi’s usual login, model picker, and `/llama` commands. Your explicit reasoning, budget, sampling, slot, and cache settings are preserved.
+No replacement provider or new connection setup. Keep Pi’s usual login, model picker, and `/llama` commands.
 
 ## Install
 
@@ -37,13 +36,13 @@ Restart Pi after installing.
 2. Load a model through `/llama`, then select it through `/model`.
 3. Run `/thinking` and choose a reasoning level.
 
-Each level uses Pi’s thinking token budget. Your custom reasoning, budget, and sampling settings are kept. Thinking tokens still count toward the model’s output and context limits.
+Native efforts use Pi’s thinking token budgets. Explicit reasoning, budget, sampling, slot, and cache settings are preserved. Thinking tokens still count toward the model’s output and context limits.
 
 ## Sharing a model between agents
 
-A server slot lets a session reuse its cached conversation between turns. The extension assigns separate slots automatically when available; no extra Pi setup is needed.
+A server slot can retain a session’s cached conversation between turns. Assignments are automatic when slots are available; no extra Pi setup is needed.
 
-Run `/llama-slots` to see a tree of the selected model’s slots, their busy/idle state, counters, and session assignments. The footer shows your session’s slot or why it has no assignment.
+Run `/llama-slots` to inspect slots, busy/idle state, counters, and local session assignments. The footer shows your slot or why it has no assignment.
 
 Example output (illustrative values; missing counters appear as `?`):
 
@@ -58,19 +57,17 @@ qwen
 Snapshot only. Counters are not total KV memory usage; local leases do not identify external clients.
 ```
 
-Other extensions can turn automatic slot management off or back on while Pi is idle. This lets another extension manage slots without disabling reasoning support or manual inspection. See the [integration contract](vision.md#slot-management-control) for the event and example.
-
 The server needs slot inspection enabled and enough slots for your sessions. For example, our tested three-slot setup uses:
 
 ```text
 --slots --parallel 3 --kv-unified --no-cache-idle-slots
 ```
 
-These are **llama.cpp server options**, not Pi options. They allow three requests to share one context pool and avoid clearing idle sessions’ caches on every new request. The extension does not change your server settings. See [vision.md](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md#live-multi-slot-setup-and-verification) for the tested build and setup details.
+These are **server options**, not Pi options: three slots share one context pool, and idle caches aren’t cleared on every new request. The extension does not change server settings. See the [tested setup](https://github.com/Ryu-CZ/pi-llama-reasoning/blob/main/vision.md#live-multi-slot-setup-and-verification) for details.
 
-- Only sessions on the same machine sharing a local cache, server, and model can coordinate slot assignments.
+- Coordination is local: sessions must share a machine, local cache, server, and model.
 - If no slot is available or inspection fails, requests continue without an assignment and Pi shows a warning.
-- Other clients, memory pressure, or model reloads can force the server to process your conversation again. Your explicit slot and cache settings are kept.
+- Pinning supports cache reuse, not guaranteed retention. Other clients, server settings, memory pressure, or model reloads can still force reprocessing.
 
 ## Limits
 

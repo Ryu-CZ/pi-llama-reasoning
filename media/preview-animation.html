@@ -41,8 +41,9 @@ function wedge(x, y, width, height, reveal = 1, selected = null) {
     ctx.beginPath(); ctx.moveTo(left, y + height); ctx.lineTo(left, topLeft);
     ctx.lineTo(right, topRight); ctx.lineTo(right, y + height); ctx.closePath();
     ctx.strokeStyle = C.blue; ctx.lineWidth = 2;
-    if (reveal >= (i + 1) / 3 && (selected === null || selected === i)) {
-      ctx.fillStyle = C.blue; ctx.fill();
+    if (reveal >= (i + 1) / 3) {
+      // Selection reads as colour, not as a missing segment.
+      ctx.fillStyle = selected === i ? C.white : C.blue; ctx.fill();
     } else ctx.stroke();
   }
 }

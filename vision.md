@@ -293,6 +293,7 @@ Project setup follows `pi-minimal-footer`: TypeScript under `extensions/`, Node 
 
 ## Verification
 
+- Pi 1.6.0: typecheck and all 60 tests passed on Node.js 22.19.0 and 26.10.0. The packed extension installed alongside Pi 1.6.0 with strict peer resolution. Integration tests used a local HTTP fixture, not a live router.
 - Pi 1.5.2; Node.js 22.19.0 and 26.10.0.
 - Test-audit patches: all 55 tests pass on both Node versions; typecheck and package dry-run pass. The timeout test records initial signal state and observed aborts, asserting outside production’s error-catching boundary. Discovery and coordination warnings use separate fixtures and exact warning assertions. In a temporary copy, two type-correct production mutations (passing an already-aborted discovery signal and silently swallowing a lease-acquisition error) each fail the relevant patched test. Production code is unchanged.
 - Slot implementation: all 54 tests passed on both Node versions; `npm run check`, `npm pack --dry-run`, and `git diff --check` passed. Live single-slot inspection, independent-process multi-slot prefix reuse, and near-full unified-pool use verified as described above. This does not establish strict isolation from other clients or eviction.

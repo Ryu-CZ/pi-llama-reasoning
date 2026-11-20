@@ -13,7 +13,7 @@ Extends [Pi](https://pi.dev)’s built-in llama.cpp integration with native reas
 
 ## Why use it?
 
-Pi 1.5.2 already handles connection, model selection, and generation. This extension adds:
+Pi already handles connection, model selection, and generation. This extension adds:
 
 - **Native reasoning levels:** choose model-reported efforts such as `low`, `medium`, and `xhigh` through Pi’s thinking selector.
 - **Automatic slot pinning:** keep sessions on separate available server slots across turns, reducing the chance that agents displace each other’s cached conversations.
@@ -22,7 +22,7 @@ No replacement provider or new connection setup. Keep Pi’s usual login, model 
 
 ## Install
 
-Requires Pi **1.5.2** and Node.js **22.19.0+**.
+Supports Pi **1.5.2 through 1.6.0**. Requires Node.js **22.19.0+**.
 
 ```bash
 pi install npm:pi-llama-reasoning

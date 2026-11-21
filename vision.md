@@ -280,8 +280,11 @@ Do not relax override detection just to accept previously enhanced models; that 
 npm ci
 npm run check
 npm test
+npm run test:coverage
 npm pack --dry-run
 ```
+
+Coverage reports only extension source exercised by the unit suite, with no minimum threshold. Keep the Pi loader integration tests in `npm test`: Jiti and Node load different versions of the same source under one file URL, which makes Node's merged coverage inaccurate.
 
 Try a checkout without changing Pi settings:
 

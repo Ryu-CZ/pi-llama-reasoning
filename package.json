@@ -31,6 +31,7 @@
   },
   "scripts": {
     "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "test:coverage": "node --test --test-concurrency=1 --experimental-test-coverage --test-coverage-include='extensions/*.ts' --test-coverage-include='extensions/**/*.ts' tests/discovery.test.mjs tests/lifecycle.test.mjs tests/reasoning.test.mjs tests/slot-leases.test.mjs tests/slots.test.mjs",
     "check": "tsc --noEmit"
   },
   "peerDependencies": {

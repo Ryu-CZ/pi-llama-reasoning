@@ -4,6 +4,7 @@
   <a href="https://www.npmjs.com/package/pi-llama-reasoning"><img src="https://img.shields.io/npm/v/pi-llama-reasoning" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/pi-llama-reasoning"><img src="https://img.shields.io/npm/dt/pi-llama-reasoning" alt="npm downloads"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a>
+  <a href="https://github.com/Ryu-CZ/pi-llama-reasoning/actions/workflows/compat.yml"><img src="https://github.com/Ryu-CZ/pi-llama-reasoning/actions/workflows/compat.yml/badge.svg?branch=main" alt="Pi compatibility"></a>
   <a href="https://pi.dev/packages/pi-llama-reasoning"><img src="https://img.shields.io/badge/pi-package-1a1a2e" alt="pi package"></a>
 </p>
 

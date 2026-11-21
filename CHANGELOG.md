@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Show Pi compatibility check status in the README.
+
 ### Fixed
 
 - Allow installation alongside Pi 1.6.0.

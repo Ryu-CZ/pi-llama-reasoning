@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-21
+
 ### Added
 
 - Show Pi compatibility check status in the README.
@@ -73,7 +75,8 @@ No user-facing changes.
 
 - Correct refresh guidance: restart Pi after template capabilities change; `/reload` retains the active model’s efforts.
 
-[Unreleased]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Ryu-CZ/pi-llama-reasoning/compare/v0.1.3...v0.2.0

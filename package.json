@@ -1,6 +1,6 @@
 {
   "name": "pi-llama-reasoning",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Use native llama.cpp reasoning efforts in Pi’s thinking selector, with matching token budgets and no extra configuration.",
   "type": "module",
   "keywords": [
